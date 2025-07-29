@@ -20,7 +20,7 @@ localPort = 8082
 externalPort = 3000
 
 [workflows]
-runButton = "Run Separate Ports"
+runButton = "Run Both"
 
 [[workflows.workflow]]
 name = "Run Both"
@@ -33,7 +33,7 @@ args = "cd backend && python manage.py runserver 0.0.0.0:8000"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd appgaming && npm run start"
+args = "cd frontend && npm start"
 
 [[workflows.workflow]]
 name = "Run Backend"
