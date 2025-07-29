@@ -191,6 +191,14 @@ export const useAuth = () => {
 
       console.log('Starting registration with data:', userData);
       
+      console.log('Calling userService.register with data:', {
+        name: userData.name,
+        phone: userData.phone,
+        email: userData.email || '',
+        password: userData.password,
+        referralCode: userData.referralCode || ''
+      });
+
       // Use userService for registration
       const result = await userService.register({
         name: userData.name,
@@ -199,6 +207,8 @@ export const useAuth = () => {
         password: userData.password,
         referralCode: userData.referralCode || ''
       });
+
+      console.log('userService.register result:', result);
 
       if (result.success && result.data) {
         // Set user and auth state

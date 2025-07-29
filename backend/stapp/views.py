@@ -99,8 +99,12 @@ def register_user(request):
             }, status=201)
 
         except json.JSONDecodeError:
+            print(f"[DEBUG] JSON decode error in registration")
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:
+            print(f"[DEBUG] Registration error: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -170,15 +174,15 @@ def get_user_profile(request):
             user.referral_code = generate_referral_code(user.username, user.mobile)
             user.save()
 
-       
-            
+
+
         return Response({
             'id': user.id,
             'username': user.username,
             'mobile': user.mobile,
             'email': user.email,
             'referral_code': user.referral_code,
-            
+
             'date_joined': user.date_joined,
             'status': 'active' if user.is_active else 'blocked' 
         })
@@ -206,7 +210,7 @@ def get_wallet_balance(request):
 def place_bet(request):
     try:
         from .game_timing import GameTimingManager
-    
+
         data = request.data
         game_name = data.get('game_name')
         number = data.get('number')
@@ -311,7 +315,7 @@ def place_bet(request):
         import traceback
         print("[DEBUG] Exception in place_bet:", traceback.format_exc())
         return Response({'error': str(e)}, status=500)
-    
+
 # ...existing code...
 
 @api_view(['POST'])
@@ -457,8 +461,8 @@ class RegisterView(APIView):
                 'referral_code': user.referral_code
             }, status=201)
         return Response(serializer.errors, status=400)
-    
-    
+
+
 class MobileLoginView(TokenObtainPairView):
     serializer_class = MobileTokenObtainPairSerializer
 
@@ -478,7 +482,7 @@ def withdraw_request(request):
     try:
         amount = Decimal(str(request.data.get('amount', 0)))
         wallet = Wallet.objects.get(user=request.user)
-        
+
         if amount < 100:
             return Response({'error': 'Minimum withdrawal amount is ₹100.'}, status=400)
         if amount > 30000:
@@ -534,7 +538,7 @@ def transaction_history(request):
         return Response(data)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-    
+
 from datetime import datetime, timedelta
 from django.utils import timezone
 
@@ -1129,7 +1133,7 @@ def user_deposit_request(request):
             'error': 'Failed to process deposit request',
             'details': str(e)
         }, status=500)
-    
+
 
 
 @api_view(['GET'])
@@ -1160,7 +1164,7 @@ def admin_deposit_action(request):
             return Response({'error': 'Invalid request data'}, status=400)
 
         deposit = DepositRequest.objects.get(id=deposit_id)
-        
+
         if deposit.status != 'pending':
             return Response({'error': 'Deposit request already processed'}, status=400)
 
@@ -1243,7 +1247,7 @@ def admin_deposit_action(request):
         return Response({'error': 'Deposit request not found'}, status=404)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-    
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsActiveUser])
 def referral_earnings(request):
@@ -1273,10 +1277,10 @@ def admin_referral_summary(request):
 def game_status(request):
     try:
         from .game_timing import GameTimingManager
-        
+
         timing_manager = GameTimingManager()
         games_status = timing_manager.get_all_games_status()
-        
+
         return Response({
             'games': games_status,
             'current_time': timing_manager.get_current_time().strftime('%I:%M %p'),
@@ -1377,7 +1381,7 @@ def undo_result(request):
     try:
         if not request.user.is_staff:
             return Response({'error': 'Admin access required'}, status=403)
-        
+
         game_name = request.data.get('game_name')
         if not game_name:
             return Response({'error': 'Game name required'}, status=400)
@@ -1421,7 +1425,7 @@ def undo_result(request):
             bet.save()
 
         return Response({'message': f'Current session results and commissions for {game_name} have been securely undone'})
-    
+
     except Exception as e:
         import traceback
         print(traceback.format_exc())
@@ -1546,10 +1550,10 @@ def admin_dashboard_stats(request):
         user_total = (
             Decimal(wallet.balance)
             + Decimal(wallet.bonus)
-           
+
             + Decimal(wallet.winnings)
             + Decimal(commission_earned)
-            
+
         )
         total_wallet_balance += user_total
 
@@ -2030,7 +2034,7 @@ def admin_undo_reset_user(request, user_id):
         return Response({"success": True, "msg": "User data securely restored from backup."})
     except Exception as e:
         return Response({"success": False, "msg": f"Restore failed: {str(e)}"}, status=500)
-   
+
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def admin_user_backup(request, user_id):

@@ -33,7 +33,7 @@ interface BetData {
 
 // API Service for all HTTP requests
 export const apiService = {
-  baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://f6a6e99e-6f1a-48e3-8f59-ddb95fafc3d4-00-esakm2bltiwd.kirk.replit.dev:8000/api',
+  baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://f6a6e99e-6f1a-48e3-8f59-ddb95fafc3d4-00-esakm2bltiwd.kirk.replit.dev:8000',
 
   // Helper to get auth token
   getAuthToken: () => {
@@ -172,7 +172,7 @@ export const apiService = {
         throw new Error('No refresh token available');
       }
 
-      const response = await fetch(`${apiService.baseURL}/api/token/refresh/`, {
+      const response = await fetch(`${apiService.baseURL}/token/refresh/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

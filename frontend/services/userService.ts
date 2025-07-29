@@ -25,7 +25,7 @@ export interface RegisterData {
 }
 
 class UserService {
-  private baseUrl = '/api';
+  private baseUrl = '';
 
   private setToken(token: string): void {
     try {
