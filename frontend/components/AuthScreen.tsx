@@ -205,18 +205,6 @@ export default function AuthScreen({
       onAuthSuccess(userWithNewFlag);
     }, 100);
   };
-      } else {
-        Alert.alert(
-          "Error",
-          result.error || "Registration failed. Please try again."
-        );
-      }
-    } catch (error) {
-      Alert.alert("Error", "Registration failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Modal
