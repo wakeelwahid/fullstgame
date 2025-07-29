@@ -191,35 +191,74 @@ export const useAuth = () => {
 
       console.log('Starting registration with data:', userData);
       
+      // Prepare API payload - mapping to backend expected format
       const registerPayload = {
-        name: userData.name,
-        phone: userData.phone,
+        username: userData.name,
+        mobile: userData.phone,
         email: userData.email || '',
         password: userData.password,
-        referralCode: userData.referralCode || ''
+        referral_code: userData.referralCode || ''
       };
       
-      console.log('Calling userService.register with data:', registerPayload);
+      console.log('Making direct API call to register with payload:', registerPayload);
 
-      // Use userService for registration
-      const result = await userService.register(registerPayload);
+      // Make direct API call to backend
+      const response = await fetch(`${apiService.baseURL}/api/register/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registerPayload),
+      });
 
-      console.log('userService.register result:', result);
+      const data = await response.json();
+      console.log('Registration API response:', data);
 
-      if (result.success && result.data) {
-        // Set user and auth state
-        setUser(result.data.user);
-        setIsAuthenticated(true);
-        
-        console.log('Registration successful:', result.data.user.name);
-        return { success: true, user: result.data.user };
+      if (!response.ok) {
+        if (response.status === 400) {
+          return { success: false, error: data.error || data.detail || 'Registration details incorrect हैं।' };
+        } else if (response.status === 409) {
+          return { success: false, error: 'यह mobile number या email पहले से registered है।' };
+        } else {
+          return { success: false, error: 'Registration में problem हुई। कृपया बाद में try करें।' };
+        }
       }
+
+      // If registration successful, create user object
+      const registeredUser = {
+        id: data.user?.id || Date.now().toString(),
+        name: data.user?.username || userData.name,
+        phone: data.user?.mobile || userData.phone,
+        email: data.user?.email || userData.email || '',
+        kycStatus: data.user?.kyc_status || 'PENDING',
+        referralCode: data.user?.referral_code || 'REF' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+        walletBalance: data.user?.wallet_balance || 0,
+        isVerified: data.user?.is_verified || false,
+        joinedAt: data.user?.created_at || new Date().toISOString()
+      };
+
+      // Store user data and tokens securely
+      await AsyncStorage.setItem('user_data', JSON.stringify(registeredUser));
+      await AsyncStorage.setItem('access_token', data.access);
+      await AsyncStorage.setItem('refresh_token', data.refresh);
       
-      return { success: false, error: result.error || 'Registration failed' };
+      // Also store in localStorage for web
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh);
+        localStorage.setItem('user_data', JSON.stringify(registeredUser));
+      }
+
+      // Update states
+      setUser(registeredUser);
+      setIsAuthenticated(true);
+
+      console.log('User registered successfully:', registeredUser.name, 'ID:', registeredUser.id);
+      return { success: true, user: registeredUser };
 
     } catch (error) {
       console.error('Registration error:', error);
-      return { success: false, error: 'Registration failed. कृपया बाद में try करें।' };
+      return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
     } finally {
       setIsLoading(false);
     }
