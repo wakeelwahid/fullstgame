@@ -151,9 +151,17 @@ export const useAuth = () => {
         joinedAt: data.user?.created_at || new Date().toISOString()
       };
 
-      // Store user data securely
+      // Store user data and tokens securely
       await AsyncStorage.setItem('user_data', JSON.stringify(loggedInUser));
-      await AsyncStorage.setItem('auth_token', data.token || 'token_' + Date.now());
+      await AsyncStorage.setItem('access_token', data.access);
+      await AsyncStorage.setItem('refresh_token', data.refresh);
+      
+      // Also store in localStorage for web
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh);
+        localStorage.setItem('user_data', JSON.stringify(loggedInUser));
+      }
 
       // Update states
       setUser(loggedInUser);
@@ -215,8 +223,16 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      // Clear all stored data
-      await AsyncStorage.multiRemove(['user_data', 'auth_token']);
+      // Clear all stored data from AsyncStorage
+      await AsyncStorage.multiRemove(['user_data', 'auth_token', 'access_token', 'refresh_token']);
+
+      // Clear localStorage for web
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('authToken');
+      }
 
       // Reset all states to initial values
       setUser(null);
@@ -248,10 +264,19 @@ export const useAuth = () => {
 
   const checkAuthStatus = async () => {
     try {
-      const userData = await AsyncStorage.getItem('user_data');
-      const authToken = await AsyncStorage.getItem('auth_token');
+      let userData, accessToken;
+      
+      // Try AsyncStorage first (mobile)
+      userData = await AsyncStorage.getItem('user_data');
+      accessToken = await AsyncStorage.getItem('access_token');
+      
+      // Fallback to localStorage (web)
+      if (!userData && typeof localStorage !== 'undefined') {
+        userData = localStorage.getItem('user_data');
+        accessToken = localStorage.getItem('access_token');
+      }
 
-      if (userData && authToken) {
+      if (userData && accessToken) {
         const user = JSON.parse(userData);
         setUser(user);
         setIsAuthenticated(true);

@@ -1,4 +1,3 @@
-
 import { ApiResponse, apiService } from './apiService';
 
 export interface UserProfile {
@@ -38,6 +37,19 @@ class UserService {
     }
   }
 
+  private getToken(): string | null {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        return localStorage.getItem('authToken');
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return null;
+    }
+  }
+
+
   private removeToken(): void {
     try {
       if (typeof localStorage !== 'undefined') {
@@ -53,10 +65,10 @@ class UserService {
   async login(credentials: LoginCredentials): Promise<ApiResponse<{ user: UserProfile; token: string }>> {
     try {
       const response = await apiService.post(`${this.baseUrl}/login/`, credentials);
-      
+
       if (response.data.access) {
         this.setToken(response.data.access);
-        
+
         // Get user profile after login
         const profileResponse = await this.getProfile();
         if (profileResponse.success && profileResponse.data) {
@@ -69,7 +81,7 @@ class UserService {
           };
         }
       }
-      
+
       return { success: false, error: response.data.detail || 'Login failed' };
     } catch (error) {
       console.error('Login error:', error);
@@ -90,12 +102,12 @@ class UserService {
 
       console.log('Sending registration payload:', payload);
       const response = await apiService.post(`${this.baseUrl}/register/`, payload);
-      
+
       console.log('Registration response:', response.data);
-      
+
       if (response.data.access) {
         this.setToken(response.data.access);
-        
+
         // Create user profile from response
         const user: UserProfile = {
           id: response.data.user.id?.toString() || '',
@@ -107,12 +119,12 @@ class UserService {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
-        
+
         // Store user data locally
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem('user_data', JSON.stringify(user));
         }
-        
+
         return {
           success: true,
           data: {
@@ -121,7 +133,7 @@ class UserService {
           }
         };
       }
-      
+
       return { success: false, error: response.data.error || response.data.detail || 'Registration failed' };
     } catch (error) {
       console.error('Registration error:', error);
@@ -142,11 +154,14 @@ class UserService {
   // Authentication status check
   async checkAuthStatus(): Promise<ApiResponse<{ user: UserProfile }>> {
     try {
-      const token = apiService.getAuthToken();
+      const token = this.getToken();
       if (!token) {
         return { success: false, error: 'No authentication found' };
       }
-      
+
+      // Set the token in apiService before checking profile
+      apiService.setAuthToken(token);
+
       const profileResponse = await this.getProfile();
       if (profileResponse.success && profileResponse.data) {
         return {
@@ -154,7 +169,7 @@ class UserService {
           data: { user: profileResponse.data }
         };
       }
-      
+
       return { success: false, error: 'Auth check failed' };
     } catch (error) {
       return { success: false, error: 'Auth check failed' };
@@ -165,7 +180,7 @@ class UserService {
   async getProfile(): Promise<ApiResponse<UserProfile>> {
     try {
       const response = await apiService.get(`${this.baseUrl}/profile/`);
-      
+
       if (response.data) {
         const user: UserProfile = {
           id: response.data.id?.toString() || '',
@@ -177,15 +192,15 @@ class UserService {
           createdAt: response.data.date_joined || new Date().toISOString(),
           updatedAt: response.data.last_login || new Date().toISOString()
         };
-        
+
         // Store user data locally
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem('user_data', JSON.stringify(user));
         }
-        
+
         return { success: true, data: user };
       }
-      
+
       return { success: false, error: 'Failed to get profile' };
     } catch (error) {
       console.error('Get profile error:', error);
@@ -201,13 +216,13 @@ class UserService {
         email: profileData.email || '',
         phone: profileData.phone || ''
       };
-      
+
       const response = await apiService.put(`${this.baseUrl}/profile/`, updateData);
-      
+
       if (response.data) {
         return this.getProfile(); // Return updated profile
       }
-      
+
       return { success: false, error: 'Failed to update profile' };
     } catch (error) {
       console.error('Update profile error:', error);
@@ -221,7 +236,7 @@ class UserService {
         old_password: currentPassword,
         new_password: newPassword
       });
-      
+
       return {
         success: true,
         data: { success: true }

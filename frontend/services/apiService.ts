@@ -39,7 +39,7 @@ export const apiService = {
   getAuthToken: () => {
     try {
       if (typeof localStorage !== 'undefined') {
-        return localStorage.getItem('authToken') || '';
+        return localStorage.getItem('access_token') || localStorage.getItem('authToken') || '';
       }
       return '';
     } catch (error) {
@@ -48,17 +48,32 @@ export const apiService = {
     }
   },
 
-  // GET request
+  // GET request with auto token refresh
   get: async (endpoint: string) => {
     try {
-      const token = apiService.getAuthToken();
-      const response = await fetch(`${apiService.baseURL}${endpoint}`, {
+      let token = apiService.getAuthToken();
+      let response = await fetch(`${apiService.baseURL}${endpoint}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
       });
+
+      // If token expired, try to refresh
+      if (response.status === 401 && token) {
+        const refreshResult = await apiService.refreshToken();
+        if (refreshResult.success) {
+          token = refreshResult.access_token;
+          response = await fetch(`${apiService.baseURL}${endpoint}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+        }
+      }
 
       const data = await response.json();
       return { data };
@@ -68,11 +83,11 @@ export const apiService = {
     }
   },
 
-  // POST request
+  // POST request with auto token refresh
   post: async (endpoint: string, postData: any) => {
     try {
-      const token = apiService.getAuthToken();
-      const response = await fetch(`${apiService.baseURL}${endpoint}`, {
+      let token = apiService.getAuthToken();
+      let response = await fetch(`${apiService.baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -80,6 +95,22 @@ export const apiService = {
         },
         body: JSON.stringify(postData),
       });
+
+      // If token expired, try to refresh
+      if (response.status === 401 && token) {
+        const refreshResult = await apiService.refreshToken();
+        if (refreshResult.success) {
+          token = refreshResult.access_token;
+          response = await fetch(`${apiService.baseURL}${endpoint}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(postData),
+          });
+        }
+      }
 
       const data = await response.json();
       return { data };
@@ -127,6 +158,40 @@ export const apiService = {
     } catch (error) {
       console.error('API DELETE Error:', error);
       return { data: { success: false, error: 'Network error' } };
+    }
+  },
+
+  // Refresh JWT token
+  refreshToken: async () => {
+    try {
+      const refreshToken = typeof localStorage !== 'undefined' 
+        ? localStorage.getItem('refresh_token') 
+        : '';
+      
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await fetch(`${apiService.baseURL}/api/token/refresh/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh: refreshToken }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('access_token', data.access);
+        }
+        return { success: true, access_token: data.access };
+      }
+      
+      return { success: false };
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      return { success: false };
     }
   }
 };
