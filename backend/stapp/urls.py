@@ -58,7 +58,6 @@ urlpatterns = [
     path('admin/user/<int:user_id>/edit/', admin_edit_user,name='admin_edit_user'),
     path('admin/declare-result-history/', declare_result_history, name='declare_result_history'),
 ]
-```
 
 ```python
 from django.urls import path
