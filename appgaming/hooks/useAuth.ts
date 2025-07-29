@@ -181,9 +181,35 @@ export const useAuth = () => {
         return { success: false, error: validation.error };
       }
 
-      // Prepare API payload
-      const payload = {
-        username: userData.name.trim(),
+      console.log('Starting registration with data:', userData);
+      
+      // Use userService for registration
+      const result = await userService.register({
+        name: userData.name,
+        phone: userData.phone,
+        email: userData.email || '',
+        password: userData.password,
+        referralCode: userData.referralCode || ''
+      });
+
+      if (result.success && result.data) {
+        // Set user and auth state
+        setUser(result.data.user);
+        setIsAuthenticated(true);
+        
+        console.log('Registration successful:', result.data.user.name);
+        return { success: true, user: result.data.user };
+      }
+      
+      return { success: false, error: result.error || 'Registration failed' };
+
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: 'Registration failed. कृपया बाद में try करें।' };
+    } finally {
+      setIsLoading(false);
+    }
+  };e: userData.name.trim(),
         mobile: userData.phone.trim(),
         email: userData.email?.trim() || '',
         password: userData.password,

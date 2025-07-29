@@ -48,10 +48,10 @@ def register_user(request):
         try:
             data = json.loads(request.body)
             username = data.get('username')
-            mobile = data.get('mobile')
+            mobile = data.get('mobile') or data.get('phone')  # Support both mobile and phone
             email = data.get('email')
             password = data.get('password')
-            referral_code = data.get('referral_code', '')
+            referral_code = data.get('referral_code') or data.get('referralCode', '')  # Support both formats
 
             # Check if user already exists
             if User.objects.filter(username=username).exists():
@@ -80,7 +80,20 @@ def register_user(request):
             # Create wallet for user
             Wallet.objects.create(user=user)
 
+            # Generate JWT tokens for immediate login
+            refresh = RefreshToken.for_user(user)
+            access_token = refresh.access_token
+
             return JsonResponse({
+                'access': str(access_token),
+                'refresh': str(refresh),
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'mobile': user.mobile,
+                    'email': user.email,
+                    'referral_code': user.referral_code
+                },
                 'message': 'User registered successfully',
                 'referral_code': new_referral_code
             }, status=201)

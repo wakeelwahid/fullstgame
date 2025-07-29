@@ -79,25 +79,50 @@ class UserService {
 
   async register(userData: RegisterData): Promise<ApiResponse<{ user: UserProfile; token: string }>> {
     try {
-      const response = await apiService.post(`${this.baseUrl}/register/`, userData);
+      // Map frontend data to backend expected format
+      const payload = {
+        username: userData.name,
+        mobile: userData.phone,
+        email: userData.email || '',
+        password: userData.password,
+        referral_code: userData.referralCode || ''
+      };
+
+      console.log('Sending registration payload:', payload);
+      const response = await apiService.post(`${this.baseUrl}/register/`, payload);
+      
+      console.log('Registration response:', response.data);
       
       if (response.data.access) {
         this.setToken(response.data.access);
         
-        // Get user profile after registration
-        const profileResponse = await this.getProfile();
-        if (profileResponse.success && profileResponse.data) {
-          return {
-            success: true,
-            data: {
-              user: profileResponse.data,
-              token: response.data.access
-            }
-          };
+        // Create user profile from response
+        const user: UserProfile = {
+          id: response.data.user.id?.toString() || '',
+          name: response.data.user.username || userData.name,
+          phone: response.data.user.mobile || userData.phone,
+          email: response.data.user.email || userData.email || '',
+          referralCode: response.data.user.referral_code || '',
+          kycStatus: 'PENDING',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        // Store user data locally
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('user_data', JSON.stringify(user));
         }
+        
+        return {
+          success: true,
+          data: {
+            user: user,
+            token: response.data.access
+          }
+        };
       }
       
-      return { success: false, error: response.data.detail || 'Registration failed' };
+      return { success: false, error: response.data.error || response.data.detail || 'Registration failed' };
     } catch (error) {
       console.error('Registration error:', error);
       return { success: false, error: 'Registration failed' };

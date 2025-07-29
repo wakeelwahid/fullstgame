@@ -98,6 +98,8 @@ export default function AuthScreen({
   };
 
   const handleRegister = async () => {
+    console.log('Registration attempt with data:', registerData);
+    
     // Username validation
     if (!registerData.name || !registerData.name.trim()) {
       Alert.alert("Error", "Username जरूरी है");
@@ -172,13 +174,30 @@ export default function AuthScreen({
 
     setLoading(true);
     try {
+      console.log('Calling register function...');
       const result = await register(registerData);
+      console.log('Register result:', result);
 
       if (result.success && result.user) {
         const userWithNewFlag = { ...result.user, isNewUser: true };
+        Alert.alert("✅ Success", "Registration successful! Welcome to DreamBig!");
         // First close the modal
         onClose();
-        // Then trigger auth success which should redirect to home
+        // Then trigger auth success
+        setTimeout(() => {
+          onAuthSuccess(userWithNewFlag);
+        }, 100);
+      } else {
+        console.error('Registration failed:', result.error);
+        Alert.alert("❌ Registration Error", result.error || "Registration failed. Please try again.");
+      }
+    } catch (error) {
+      console.error('Registration exception:', error);
+      Alert.alert("❌ Error", "Network error. कृपया अपना internet connection check करें।");
+    } finally {
+      setLoading(false);
+    }
+  };er auth success which should redirect to home
         setTimeout(() => {
           onAuthSuccess(userWithNewFlag);
         }, 100);
