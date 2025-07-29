@@ -197,10 +197,14 @@ export default function AuthScreen({
     } finally {
       setLoading(false);
     }
-  };er auth success which should redirect to home
-        setTimeout(() => {
-          onAuthSuccess(userWithNewFlag);
-        }, 100);
+  };
+
+  // Handle auth success which should redirect to home
+  const handleAuthSuccess = (userWithNewFlag: any) => {
+    setTimeout(() => {
+      onAuthSuccess(userWithNewFlag);
+    }, 100);
+  };
       } else {
         Alert.alert(
           "Error",
