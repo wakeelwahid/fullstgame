@@ -1,0 +1,63 @@
+
+› Press a │ open Android
+› Press w │ open web
+
+› Press j │ open debugger
+› Press r │ reload app
+› Press m │ toggle menu
+› shift+m │ more tools
+› Press o │ open project code in your editor
+
+› Press ? │ show all commands
+
+Logs for your project will appear below. Press Ctrl+C to exit.
+Web Bundling failed 768ms index.ts (139 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (915:20)
+
+  913 |                   <View style={styles.inputContainer>
+  914 |                     <Text style={styles.inputLabel}>Confirm Password *</Text>
+> 915 |                     <TextInput
+      |                     ^
+  916 |                       style={styles.textInput}
+  917 |                       placeholder="Confirm password"
+  918 |                       placeholderTextColor="#999"
+Web Bundling failed 179ms index.ts (118 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (915:20)
+
+  913 |                   <View style={styles.inputContainer>
+  914 |                     <Text style={styles.inputLabel}>Confirm Password *</Text>
+> 915 |                     <TextInput
+      |                     ^
+  916 |                       style={styles.textInput}
+  917 |                       placeholder="Confirm password"
+  918 |                       placeholderTextColor="#999"
+Web Bundling failed 134ms index.ts (135 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (915:20)
+
+  913 |                   <View style={styles.inputContainer>
+  914 |                     <Text style={styles.inputLabel}>Confirm Password *</Text>
+> 915 |                     <TextInput
+      |                     ^
+  916 |                       style={styles.textInput}
+  917 |                       placeholder="Confirm password"
+  918 |                       placeholderTextColor="#999"
+Web Bundling failed 87ms index.ts (1 module)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (915:20)
+
+  913 |                   <View style={styles.inputContainer>
+  914 |                     <Text style={styles.inputLabel}>Confirm Password *</Text>
+> 915 |                     <TextInput
+      |                     ^
+  916 |                       style={styles.textInput}
+  917 |                       placeholder="Confirm password"
+  918 |                       placeholderTextColor="#999"
+Web Bundling failed 243ms index.ts (120 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (915:20)
+
+  913 |                   <View style={styles.inputContainer>
+  914 |                     <Text style={styles.inputLabel}>Confirm Password *</Text>
+> 915 |                     <TextInput
+      |                     ^
+  916 |                       style={styles.textInput}
+  917 |                       placeholder="Confirm password"
+  918 |                       placeholderTextColor="#999"

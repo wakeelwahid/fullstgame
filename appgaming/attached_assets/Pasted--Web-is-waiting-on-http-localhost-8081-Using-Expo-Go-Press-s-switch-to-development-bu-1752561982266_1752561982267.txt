@@ -1,0 +1,202 @@
+
+› Web is waiting on http://localhost:8081
+
+› Using Expo Go
+› Press s │ switch to development build
+
+› Press a │ open Android
+› Press w │ open web
+
+› Press j │ open debugger
+› Press r │ reload app
+› Press m │ toggle menu
+› shift+m │ more tools
+› Press o │ open project code in your editor
+
+› Press ? │ show all commands
+
+Logs for your project will appear below. Press Ctrl+C to exit.
+Web Bundling failed 1244ms index.ts (1 module)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 1326ms index.ts (139 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 266ms index.ts (118 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 172ms index.ts (118 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 236ms index.ts (139 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 198ms index.ts (96 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 261ms index.ts (118 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+
+> dreambig@1.0.0 start
+> expo start
+
+Starting project at /home/runner/workspace
+Starting Metro Bundler
+The following packages should be updated for best compatibility with the installed expo version:
+  react-native@0.79.3 - expected version: 0.79.5
+Your project may not work correctly until you install the expected versions of the packages.
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█ ▄▄▄▄▄ █   █▄ ▀▄██ ▄▄▄▄▄ █
+█ █   █ █ ▀▄ █▀▄█▀█ █   █ █
+█ █▄▄▄█ █▀██▀▀▄▀▄██ █▄▄▄█ █
+█▄▄▄▄▄▄▄█▄▀▄█ █▄▀ █▄▄▄▄▄▄▄█
+█▄▄█▀  ▄█▀▀▀▄▀▀▄ ▄██ ▀▄▄ ▄█
+█▀ █▄▄▀▄▀▄█▀ ▄██▄ ▀ █▄  ▀██
+█ ██▀▀█▄▄██▄█▄█▄▀▄▀▄▀▀▄ ▀██
+███ ▀▄▀▄▀  ██▀▄█ ▀▄▀ ▄ ▀███
+█▄▄▄▄█▄▄█▀▀▀▄ █▄▀ ▄▄▄ ▀ ▄▄█
+█ ▄▄▄▄▄ █▀▀█ ▄██▀ █▄█ ▀▀███
+█ █   █ █▄█▄▀▀▀▄█ ▄ ▄▄▀ ▀▀█
+█ █▄▄▄█ █▀ ▀ ███▀█▀▄▀█▀▀ ██
+█▄▄▄▄▄▄▄█▄▄▄▄██▄██▄▄▄▄▄▄▄▄█
+
+› Metro waiting on exp://172.31.128.120:8081
+› Scan the QR code above with Expo Go (Android) or the Camera app (iOS)
+
+› Web is waiting on http://localhost:8081
+
+› Using Expo Go
+› Press s │ switch to development build
+
+› Press a │ open Android
+› Press w │ open web
+
+› Press j │ open debugger
+› Press r │ reload app
+› Press m │ toggle menu
+› shift+m │ more tools
+› Press o │ open project code in your editor
+
+› Press ? │ show all commands
+
+Logs for your project will appear below. Press Ctrl+C to exit.
+Web Bundling failed 1244ms index.ts (1 module)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 1326ms index.ts (139 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 266ms index.ts (118 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 172ms index.ts (118 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 236ms index.ts (139 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 198ms index.ts (96 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
+Web Bundling failed 261ms index.ts (118 modules)
+ ERROR  SyntaxError: /home/runner/workspace/App.tsx: Expected corresponding JSX closing tag for <SafeAreaView>. (543:8)
+
+  541 |           </View>
+  542 |         </Modal>
+> 543 |       )}</li>
+      |         ^
+  544 |
+  545 |       {/* Betting Modal */}
+  546 |       <Modal
