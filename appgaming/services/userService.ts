@@ -1,5 +1,5 @@
 
-import { ApiResponse } from './apiService';
+import { ApiResponse, apiService } from './apiService';
 
 export interface UserProfile {
   id: string;
@@ -25,231 +25,238 @@ export interface RegisterData {
   referralCode?: string;
 }
 
-// Static user data
-const staticUserData: UserProfile = {
-  id: 'user_123',
-  name: 'John Doe',
-  phone: '+919876543210',
-  email: 'john@example.com',
-  referralCode: 'REF123',
-  kycStatus: 'VERIFIED',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
-
 class UserService {
-  private baseUrl = process.env.EXPO_PUBLIC_API_URL ? `${process.env.EXPO_PUBLIC_API_URL}/api` : 'https://f6a6e99e-6f1a-48e3-8f59-ddb95fafc3d4-00-esakm2bltiwd.kirk.replit.dev:8000/api';
-
-  private async makeStaticResponse<T>(data: T, delay: number = 500): Promise<ApiResponse<T>> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          success: true,
-          data,
-        });
-      }, delay);
-    });
-  }
-
-  private getToken(): string {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        return localStorage.getItem('authToken') || 'static_token_123';
-      }
-      return 'static_token_123';
-    } catch (error) {
-      console.error('Error getting token:', error);
-      return 'static_token_123';
-    }
-  }
+  private baseUrl = '/api';
 
   private setToken(token: string): void {
     try {
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('authToken', token);
-        localStorage.setItem('user_data', JSON.stringify(staticUserData));
       }
     } catch (error) {
       console.error('Error setting token:', error);
     }
   }
 
-  // Authentication APIs - Static responses
-  async login(credentials: LoginCredentials): Promise<ApiResponse<{ user: UserProfile; token: string }>> {
-    // Validate credentials (basic validation for demo)
-    if (credentials.phone && credentials.password) {
-      const token = 'static_auth_token_' + Date.now();
-      this.setToken(token);
-      
-      return this.makeStaticResponse({
-        user: staticUserData,
-        token: token
-      });
-    } else {
-      return {
-        success: false,
-        error: 'Invalid credentials'
-      };
-    }
-  }
-
-  async register(userData: RegisterData): Promise<ApiResponse<{ user: UserProfile; token: string }>> {
-    // Create new user with provided data
-    const newUser: UserProfile = {
-      ...staticUserData,
-      id: 'user_' + Date.now(),
-      name: userData.name,
-      phone: userData.phone,
-      email: userData.email || '',
-      referralCode: userData.referralCode || 'REF' + Math.random().toString(36).substring(7).toUpperCase(),
-    };
-
-    const token = 'static_auth_token_' + Date.now();
-    this.setToken(token);
-
-    return this.makeStaticResponse({
-      user: newUser,
-      token: token
-    });
-  }
-
-  async logout(): Promise<ApiResponse<{ success: boolean }>> {
+  private removeToken(): void {
     try {
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem('authToken');
         localStorage.removeItem('user_data');
       }
-      return this.makeStaticResponse({ success: true });
+    } catch (error) {
+      console.error('Error removing token:', error);
+    }
+  }
+
+  // Authentication APIs
+  async login(credentials: LoginCredentials): Promise<ApiResponse<{ user: UserProfile; token: string }>> {
+    try {
+      const response = await apiService.post(`${this.baseUrl}/login/`, credentials);
+      
+      if (response.data.access) {
+        this.setToken(response.data.access);
+        
+        // Get user profile after login
+        const profileResponse = await this.getProfile();
+        if (profileResponse.success && profileResponse.data) {
+          return {
+            success: true,
+            data: {
+              user: profileResponse.data,
+              token: response.data.access
+            }
+          };
+        }
+      }
+      
+      return { success: false, error: response.data.detail || 'Login failed' };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: 'Login failed' };
+    }
+  }
+
+  async register(userData: RegisterData): Promise<ApiResponse<{ user: UserProfile; token: string }>> {
+    try {
+      const response = await apiService.post(`${this.baseUrl}/register/`, userData);
+      
+      if (response.data.access) {
+        this.setToken(response.data.access);
+        
+        // Get user profile after registration
+        const profileResponse = await this.getProfile();
+        if (profileResponse.success && profileResponse.data) {
+          return {
+            success: true,
+            data: {
+              user: profileResponse.data,
+              token: response.data.access
+            }
+          };
+        }
+      }
+      
+      return { success: false, error: response.data.detail || 'Registration failed' };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: 'Registration failed' };
+    }
+  }
+
+  async logout(): Promise<ApiResponse<{ success: boolean }>> {
+    try {
+      this.removeToken();
+      return { success: true, data: { success: true } };
     } catch (error) {
       console.error('Error during logout:', error);
       return { success: false, error: 'Logout failed' };
     }
   }
 
-  // Authentication status check - Static response
+  // Authentication status check
   async checkAuthStatus(): Promise<ApiResponse<{ user: UserProfile }>> {
     try {
-      if (typeof localStorage !== 'undefined') {
-        const userData = localStorage.getItem('user_data');
-        const authToken = localStorage.getItem('authToken');
-        
-        if (userData && authToken) {
-          return {
-            success: true,
-            data: { user: JSON.parse(userData) }
-          };
-        }
+      const token = apiService.getAuthToken();
+      if (!token) {
+        return { success: false, error: 'No authentication found' };
       }
       
-      return { success: false, error: 'No authentication found' };
+      const profileResponse = await this.getProfile();
+      if (profileResponse.success && profileResponse.data) {
+        return {
+          success: true,
+          data: { user: profileResponse.data }
+        };
+      }
+      
+      return { success: false, error: 'Auth check failed' };
     } catch (error) {
       return { success: false, error: 'Auth check failed' };
     }
   }
 
-  // Profile APIs - Static responses
+  // Profile APIs
   async getProfile(): Promise<ApiResponse<UserProfile>> {
-    if (!this.getToken()) {
-      return { success: false, error: 'Authentication required' };
+    try {
+      const response = await apiService.get(`${this.baseUrl}/profile/`);
+      
+      if (response.data) {
+        const user: UserProfile = {
+          id: response.data.id?.toString() || '',
+          name: response.data.first_name + ' ' + response.data.last_name || response.data.username || '',
+          phone: response.data.phone || '',
+          email: response.data.email || '',
+          referralCode: response.data.referral_code || '',
+          kycStatus: 'PENDING', // Default status
+          createdAt: response.data.date_joined || new Date().toISOString(),
+          updatedAt: response.data.last_login || new Date().toISOString()
+        };
+        
+        // Store user data locally
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('user_data', JSON.stringify(user));
+        }
+        
+        return { success: true, data: user };
+      }
+      
+      return { success: false, error: 'Failed to get profile' };
+    } catch (error) {
+      console.error('Get profile error:', error);
+      return { success: false, error: 'Failed to get profile' };
     }
-    return this.makeStaticResponse(staticUserData);
   }
 
   async updateProfile(profileData: Partial<UserProfile>): Promise<ApiResponse<UserProfile>> {
-    if (!this.getToken()) {
-      return { success: false, error: 'Authentication required' };
+    try {
+      const updateData = {
+        first_name: profileData.name?.split(' ')[0] || '',
+        last_name: profileData.name?.split(' ')[1] || '',
+        email: profileData.email || '',
+        phone: profileData.phone || ''
+      };
+      
+      const response = await apiService.put(`${this.baseUrl}/profile/`, updateData);
+      
+      if (response.data) {
+        return this.getProfile(); // Return updated profile
+      }
+      
+      return { success: false, error: 'Failed to update profile' };
+    } catch (error) {
+      console.error('Update profile error:', error);
+      return { success: false, error: 'Failed to update profile' };
     }
-    
-    const updatedUser = {
-      ...staticUserData,
-      ...profileData,
-      updatedAt: new Date().toISOString()
-    };
-
-    // Update localStorage
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('user_data', JSON.stringify(updatedUser));
-    }
-
-    return this.makeStaticResponse(updatedUser);
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<ApiResponse<{ success: boolean }>> {
-    if (!this.getToken()) {
-      return { success: false, error: 'Authentication required' };
+    try {
+      const response = await apiService.post(`${this.baseUrl}/change-password/`, {
+        old_password: currentPassword,
+        new_password: newPassword
+      });
+      
+      return {
+        success: true,
+        data: { success: true }
+      };
+    } catch (error) {
+      console.error('Change password error:', error);
+      return { success: false, error: 'Failed to change password' };
     }
-    return this.makeStaticResponse({ success: true });
   }
 
-  // KYC APIs - Static responses
-  async submitKYC(kycData: {
-    documentType: string;
-    documentNumber: string;
-    documentImages: string[];
-    personalInfo: {
-      fullName: string;
-      dateOfBirth: string;
-      address: string;
-    };
-  }): Promise<ApiResponse<{ kycId: string; status: string }>> {
-    return this.makeStaticResponse({
-      kycId: 'kyc_' + Date.now(),
-      status: 'PENDING'
-    });
+  // KYC APIs - These would need to be implemented in backend
+  async submitKYC(kycData: any): Promise<ApiResponse<{ kycId: string; status: string }>> {
+    try {
+      const response = await apiService.post(`${this.baseUrl}/kyc/submit/`, kycData);
+      return {
+        success: true,
+        data: {
+          kycId: response.data.id || 'kyc_' + Date.now(),
+          status: 'PENDING'
+        }
+      };
+    } catch (error) {
+      return { success: false, error: 'KYC submission failed' };
+    }
   }
 
   async getKYCStatus(): Promise<ApiResponse<{ status: string; rejectionReason?: string }>> {
-    return this.makeStaticResponse({
-      status: 'VERIFIED'
-    });
+    try {
+      const response = await apiService.get(`${this.baseUrl}/kyc/status/`);
+      return {
+        success: true,
+        data: {
+          status: response.data.status || 'PENDING'
+        }
+      };
+    } catch (error) {
+      return { success: false, error: 'Failed to get KYC status' };
+    }
   }
 
-  // Referral APIs - Static responses
-  async getReferralData(): Promise<ApiResponse<{
-    referralCode: string;
-    totalReferrals: number;
-    totalEarnings: number;
-    referrals: Array<{
-      id: string;
-      name: string;
-      joinedAt: string;
-      status: string;
-      earnings: number;
-    }>;
-  }>> {
-    return this.makeStaticResponse({
-      referralCode: staticUserData.referralCode,
-      totalReferrals: 5,
-      totalEarnings: 2500,
-      referrals: [
-        {
-          id: 'ref_1',
-          name: 'Amit Kumar',
-          joinedAt: '2024-01-15T10:00:00Z',
-          status: 'ACTIVE',
-          earnings: 500
-        },
-        {
-          id: 'ref_2',
-          name: 'Priya Sharma',
-          joinedAt: '2024-01-20T14:30:00Z',
-          status: 'ACTIVE',
-          earnings: 750
-        },
-        {
-          id: 'ref_3',
-          name: 'Rahul Singh',
-          joinedAt: '2024-02-01T09:15:00Z',
-          status: 'ACTIVE',
-          earnings: 300
-        }
-      ]
-    });
+  // Referral APIs - These would need to be implemented in backend
+  async getReferralData(): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiService.get(`${this.baseUrl}/referrals/`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, error: 'Failed to get referral data' };
+    }
   }
 
   async generateNewReferralCode(): Promise<ApiResponse<{ referralCode: string }>> {
-    const newCode = 'REF' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    return this.makeStaticResponse({ referralCode: newCode });
+    try {
+      const response = await apiService.post(`${this.baseUrl}/referrals/generate-code/`, {});
+      return {
+        success: true,
+        data: { referralCode: response.data.referral_code }
+      };
+    } catch (error) {
+      return { success: false, error: 'Failed to generate referral code' };
+    }
   }
 }
 

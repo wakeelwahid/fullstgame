@@ -1,84 +1,36 @@
 
 import { apiService } from './apiService';
 
-// Static bet data
-const staticBets = [
-  {
-    id: 'bet_1',
-    gameId: 1,
-    gameName: 'Mumbai Day',
-    number: 123,
-    amount: 100,
-    type: 'SINGLE',
-    status: 'WIN',
-    multiplier: 9.5,
-    winAmount: 950,
-    placedAt: '2024-01-15T10:30:00Z'
-  },
-  {
-    id: 'bet_2',
-    gameId: 2,
-    gameName: 'Delhi Night',
-    number: '45-67',
-    amount: 200,
-    type: 'JODI',
-    status: 'LOSS',
-    multiplier: 95,
-    placedAt: '2024-01-14T21:30:00Z'
-  },
-  {
-    id: 'bet_3',
-    gameId: 3,
-    gameName: 'Kolkata Open',
-    number: 789,
-    amount: 50,
-    type: 'SINGLE_PANNA',
-    status: 'PENDING',
-    multiplier: 142,
-    placedAt: '2024-01-15T09:45:00Z'
-  }
-];
-
-const staticResults = [
-  {
-    gameId: 1,
-    gameName: 'Mumbai Day',
-    result: '123-45-678',
-    declaredAt: '2024-01-15T12:05:00Z',
-    date: '2024-01-15'
-  },
-  {
-    gameId: 2,
-    gameName: 'Delhi Night',
-    result: '456-78-901',
-    declaredAt: '2024-01-14T23:05:00Z',
-    date: '2024-01-14'
-  }
-];
-
 export const betService = {
-  // Simulate API delay
-  delay: (ms: number = 400) => new Promise(resolve => setTimeout(resolve, ms)),
-
-  // Place a bet - Static response
+  // Place a bet
   placeBet: async (betData: any) => {
     try {
-      await betService.delay();
+      const response = await apiService.post('/api/place-bet/', {
+        game_id: betData.gameId,
+        number: betData.number,
+        amount: betData.amount,
+        bet_type: betData.type?.toLowerCase() || 'single'
+      });
       
-      const newBet = {
-        id: 'bet_' + Date.now(),
-        ...betData,
-        status: 'PENDING',
-        placedAt: new Date().toISOString()
-      };
+      if (response.data && response.data.success) {
+        return {
+          success: true,
+          data: {
+            bet: {
+              id: response.data.bet_id || 'bet_' + Date.now(),
+              ...betData,
+              status: 'PENDING',
+              placedAt: new Date().toISOString()
+            },
+            message: response.data.message || 'Bet placed successfully',
+            newBalance: response.data.new_balance || 0
+          }
+        };
+      }
       
       return {
-        success: true,
-        data: {
-          bet: newBet,
-          message: 'Bet placed successfully',
-          newBalance: Math.floor(Math.random() * 10000) + 1000
-        }
+        success: false,
+        error: response.data.error || 'Failed to place bet'
       };
     } catch (error) {
       console.error('Error placing bet:', error);
@@ -89,19 +41,44 @@ export const betService = {
     }
   },
 
-  // Get bet history - Static response
+  // Get bet history
   getBetHistory: async (page: number = 1, limit: number = 20) => {
     try {
-      await betService.delay();
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString()
+      });
+      
+      const response = await apiService.get(`/api/my-bets/?${params}`);
+      
+      if (response.data) {
+        const bets = (response.data.results || response.data || []).map((bet: any) => ({
+          id: bet.id?.toString() || '',
+          gameId: bet.game_id || bet.game || 0,
+          gameName: bet.game_name || 'Unknown Game',
+          number: bet.number || bet.bet_number || '',
+          amount: bet.amount || bet.bet_amount || 0,
+          type: bet.bet_type || bet.type || 'SINGLE',
+          status: bet.status || 'PENDING',
+          multiplier: bet.multiplier || 1,
+          winAmount: bet.win_amount,
+          placedAt: bet.created_at || bet.placed_at || new Date().toISOString()
+        }));
+        
+        return {
+          success: true,
+          data: {
+            bets,
+            totalCount: response.data.count || bets.length,
+            currentPage: page,
+            totalPages: Math.ceil((response.data.count || bets.length) / limit)
+          }
+        };
+      }
       
       return {
-        success: true,
-        data: {
-          bets: staticBets,
-          totalCount: staticBets.length,
-          currentPage: page,
-          totalPages: Math.ceil(staticBets.length / limit)
-        }
+        success: false,
+        error: 'Failed to fetch bet history'
       };
     } catch (error) {
       console.error('Error fetching bet history:', error);
@@ -112,16 +89,33 @@ export const betService = {
     }
   },
 
-  // Get active bets - Static response
+  // Get active bets
   getActiveBets: async () => {
     try {
-      await betService.delay();
+      const response = await apiService.get('/api/current-session/');
       
-      const activeBets = staticBets.filter(bet => bet.status === 'PENDING');
+      if (response.data) {
+        const activeBets = (response.data.bets || response.data || []).map((bet: any) => ({
+          id: bet.id?.toString() || '',
+          gameId: bet.game_id || bet.game || 0,
+          gameName: bet.game_name || 'Unknown Game',
+          number: bet.number || bet.bet_number || '',
+          amount: bet.amount || bet.bet_amount || 0,
+          type: bet.bet_type || bet.type || 'SINGLE',
+          status: bet.status || 'PENDING',
+          multiplier: bet.multiplier || 1,
+          placedAt: bet.created_at || bet.placed_at || new Date().toISOString()
+        }));
+        
+        return {
+          success: true,
+          data: activeBets.filter((bet: any) => bet.status === 'PENDING')
+        };
+      }
       
       return {
-        success: true,
-        data: activeBets
+        success: false,
+        error: 'Failed to fetch active bets'
       };
     } catch (error) {
       console.error('Error fetching active bets:', error);
@@ -132,26 +126,25 @@ export const betService = {
     }
   },
 
-  // Cancel bet - Static response
+  // Cancel bet
   cancelBet: async (betId: string) => {
     try {
-      await betService.delay();
+      const response = await apiService.post(`/api/bets/${betId}/cancel/`, {});
       
-      const bet = staticBets.find(b => b.id === betId);
-      if (bet && bet.status === 'PENDING') {
+      if (response.data && response.data.success) {
         return {
           success: true,
           data: {
             message: 'Bet cancelled successfully',
-            refundAmount: bet.amount,
-            newBalance: Math.floor(Math.random() * 10000) + 1000
+            refundAmount: response.data.refund_amount || 0,
+            newBalance: response.data.new_balance || 0
           }
         };
       }
       
       return {
         success: false,
-        error: 'Cannot cancel bet'
+        error: response.data.error || 'Cannot cancel bet'
       };
     } catch (error) {
       console.error('Error cancelling bet:', error);
@@ -162,17 +155,21 @@ export const betService = {
     }
   },
 
-  // Get bet results - Static response
+  // Get bet results
   getBetResults: async (gameId: string) => {
     try {
-      await betService.delay();
+      const response = await apiService.get(`/api/games/${gameId}/result/`);
       
-      const result = staticResults.find(r => r.gameId.toString() === gameId);
-      
-      if (result) {
+      if (response.data) {
         return {
           success: true,
-          data: result
+          data: {
+            gameId: parseInt(gameId),
+            gameName: response.data.game_name || 'Unknown Game',
+            result: response.data.result || response.data.winning_number || '',
+            declaredAt: response.data.declared_at || response.data.created_at || new Date().toISOString(),
+            date: response.data.date || new Date().toISOString().split('T')[0]
+          }
         };
       }
       
@@ -189,11 +186,19 @@ export const betService = {
     }
   },
 
-  // Get bet rates - Static response
+  // Get bet rates
   getBetRates: async () => {
     try {
-      await betService.delay();
+      const response = await apiService.get('/api/bet-rates/');
       
+      if (response.data) {
+        return {
+          success: true,
+          data: response.data
+        };
+      }
+      
+      // Default rates if API doesn't exist yet
       return {
         success: true,
         data: {
@@ -213,23 +218,21 @@ export const betService = {
     }
   },
 
-  // Get game statistics - Static response
+  // Get game statistics
   getGameStatistics: async (gameId: string) => {
     try {
-      await betService.delay();
+      const response = await apiService.get(`/api/games/${gameId}/statistics/`);
+      
+      if (response.data) {
+        return {
+          success: true,
+          data: response.data
+        };
+      }
       
       return {
-        success: true,
-        data: {
-          totalBets: Math.floor(Math.random() * 500) + 100,
-          totalAmount: Math.floor(Math.random() * 50000) + 10000,
-          winPercentage: Math.floor(Math.random() * 30) + 10,
-          popularNumbers: [
-            { number: '123', count: 25, percentage: 16.7 },
-            { number: '456', count: 20, percentage: 13.3 },
-            { number: '789', count: 18, percentage: 12.0 },
-          ]
-        }
+        success: false,
+        error: 'Failed to fetch game statistics'
       };
     } catch (error) {
       console.error('Error fetching game statistics:', error);

@@ -1,5 +1,5 @@
 
-import { ApiResponse } from './apiService';
+import { ApiResponse, apiService } from './apiService';
 
 export interface WalletBalance {
   totalBalance: number;
@@ -35,91 +35,38 @@ export interface WithdrawRequest {
   };
 }
 
-// Static data
-const staticBalance: WalletBalance = {
-  totalBalance: 5000,
-  playableBalance: 4500,
-  winnings: 2500,
-  bonus: 500
-};
-
-const staticTransactions: Transaction[] = [
-  {
-    id: 'txn_1',
-    type: 'DEPOSIT',
-    amount: 1000,
-    status: 'COMPLETED',
-    description: 'Amount added to wallet',
-    createdAt: '2024-01-15T10:30:00Z',
-    utrNumber: 'UTR123456789012'
-  },
-  {
-    id: 'txn_2',
-    type: 'BET_PLACED',
-    amount: -100,
-    status: 'COMPLETED',
-    description: 'Bet placed on Mumbai Day',
-    createdAt: '2024-01-15T11:00:00Z',
-    gameId: 1,
-    gameName: 'Mumbai Day'
-  },
-  {
-    id: 'txn_3',
-    type: 'BET_WON',
-    amount: 950,
-    status: 'COMPLETED',
-    description: 'Bet won on Mumbai Day',
-    createdAt: '2024-01-15T12:05:00Z',
-    gameId: 1,
-    gameName: 'Mumbai Day'
-  },
-  {
-    id: 'txn_4',
-    type: 'WITHDRAW',
-    amount: -500,
-    status: 'PENDING',
-    description: 'Withdrawal to bank account',
-    createdAt: '2024-01-15T14:00:00Z'
-  },
-  {
-    id: 'txn_5',
-    type: 'BONUS',
-    amount: 100,
-    status: 'COMPLETED',
-    description: 'Welcome bonus credited',
-    createdAt: '2024-01-14T09:00:00Z'
-  }
-];
-
 class WalletService {
-  private baseUrl = process.env.EXPO_PUBLIC_API_URL ? `${process.env.EXPO_PUBLIC_API_URL}/api/wallet` : 'http://192.168.132.143:8000/api/wallet';
+  private baseUrl = '/api';
 
-  private async makeStaticResponse<T>(data: T, delay: number = 400): Promise<ApiResponse<T>> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          success: true,
-          data,
-        });
-      }, delay);
-    });
-  }
-
-  // Wallet Balance APIs - Static responses
+  // Wallet Balance APIs
   async getBalance(): Promise<ApiResponse<WalletBalance>> {
-    return this.makeStaticResponse(staticBalance);
+    try {
+      const response = await apiService.get(`${this.baseUrl}/balance/`);
+      
+      if (response.data) {
+        const balance: WalletBalance = {
+          totalBalance: response.data.wallet || 0,
+          playableBalance: response.data.wallet || 0,
+          winnings: response.data.winnings || 0,
+          bonus: response.data.bonus || 0
+        };
+        
+        return { success: true, data: balance };
+      }
+      
+      return { success: false, error: 'Failed to get balance' };
+    } catch (error) {
+      console.error('Get balance error:', error);
+      return { success: false, error: 'Failed to get balance' };
+    }
   }
 
   async refreshBalance(): Promise<ApiResponse<WalletBalance>> {
-    // Simulate slight balance change
-    const updatedBalance = {
-      ...staticBalance,
-      totalBalance: staticBalance.totalBalance + Math.floor(Math.random() * 100) - 50
-    };
-    return this.makeStaticResponse(updatedBalance);
+    // Same as getBalance for now
+    return this.getBalance();
   }
 
-  // Transaction APIs - Static responses
+  // Transaction APIs
   async getTransactionHistory(
     page: number = 1,
     limit: number = 20,
@@ -130,47 +77,96 @@ class WalletService {
     currentPage: number;
     totalPages: number;
   }>> {
-    let filteredTransactions = staticTransactions;
-    
-    if (type) {
-      filteredTransactions = staticTransactions.filter(txn => txn.type === type);
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(type && { type })
+      });
+      
+      const response = await apiService.get(`${this.baseUrl}/transactions/?${params}`);
+      
+      if (response.data && response.data.results) {
+        const transactions: Transaction[] = response.data.results.map((txn: any) => ({
+          id: txn.id?.toString() || '',
+          type: this.mapTransactionType(txn.type),
+          amount: txn.amount || 0,
+          status: this.mapTransactionStatus(txn.status),
+          description: txn.note || txn.description || '',
+          createdAt: txn.created_at || txn.timestamp || new Date().toISOString(),
+          utrNumber: txn.utr_number
+        }));
+        
+        return {
+          success: true,
+          data: {
+            transactions,
+            totalCount: response.data.count || transactions.length,
+            currentPage: page,
+            totalPages: Math.ceil((response.data.count || transactions.length) / limit)
+          }
+        };
+      }
+      
+      return { success: false, error: 'Failed to get transaction history' };
+    } catch (error) {
+      console.error('Get transaction history error:', error);
+      return { success: false, error: 'Failed to get transaction history' };
     }
-
-    return this.makeStaticResponse({
-      transactions: filteredTransactions,
-      totalCount: filteredTransactions.length,
-      currentPage: page,
-      totalPages: Math.ceil(filteredTransactions.length / limit)
-    });
   }
 
   async getTransactionById(transactionId: string): Promise<ApiResponse<Transaction>> {
-    const transaction = staticTransactions.find(txn => txn.id === transactionId);
-    if (transaction) {
-      return this.makeStaticResponse(transaction);
+    try {
+      const response = await apiService.get(`${this.baseUrl}/transactions/${transactionId}/`);
+      
+      if (response.data) {
+        const transaction: Transaction = {
+          id: response.data.id?.toString() || '',
+          type: this.mapTransactionType(response.data.type),
+          amount: response.data.amount || 0,
+          status: this.mapTransactionStatus(response.data.status),
+          description: response.data.note || response.data.description || '',
+          createdAt: response.data.created_at || new Date().toISOString(),
+          utrNumber: response.data.utr_number
+        };
+        
+        return { success: true, data: transaction };
+      }
+      
+      return { success: false, error: 'Transaction not found' };
+    } catch (error) {
+      console.error('Get transaction error:', error);
+      return { success: false, error: 'Transaction not found' };
     }
-    return { success: false, error: 'Transaction not found' };
   }
 
-  // Deposit APIs - Static responses
+  // Deposit APIs
   async requestDeposit(depositData: DepositRequest): Promise<ApiResponse<{
     transactionId: string;
     status: string;
     message: string;
     paymentDetails?: any;
   }>> {
-    const transactionId = 'txn_' + Date.now();
-    
-    return this.makeStaticResponse({
-      transactionId: transactionId,
-      status: 'PENDING',
-      message: 'Deposit request submitted successfully. Amount will be credited after admin approval.',
-      paymentDetails: {
-        qrCode: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAYAAAB5fY51...',
-        upiId: 'merchant@paytm',
-        amount: depositData.amount
-      }
-    });
+    try {
+      const response = await apiService.post(`${this.baseUrl}/deposit/`, {
+        amount: depositData.amount,
+        payment_method: depositData.paymentMethod.toLowerCase(),
+        utr_number: depositData.utrNumber
+      });
+      
+      return {
+        success: true,
+        data: {
+          transactionId: response.data.id?.toString() || 'txn_' + Date.now(),
+          status: 'PENDING',
+          message: 'Deposit request submitted successfully. Amount will be credited after admin approval.',
+          paymentDetails: response.data.payment_details
+        }
+      };
+    } catch (error) {
+      console.error('Deposit request error:', error);
+      return { success: false, error: 'Failed to submit deposit request' };
+    }
   }
 
   async confirmDeposit(transactionId: string, utrNumber: string): Promise<ApiResponse<{
@@ -178,28 +174,55 @@ class WalletService {
     message: string;
     newBalance?: WalletBalance;
   }>> {
-    return this.makeStaticResponse({
-      success: true,
-      message: 'Deposit confirmation received. Amount will be credited after verification.',
-      newBalance: staticBalance
-    });
+    try {
+      const response = await apiService.post(`${this.baseUrl}/deposit/${transactionId}/confirm/`, {
+        utr_number: utrNumber
+      });
+      
+      const newBalance = await this.getBalance();
+      
+      return {
+        success: true,
+        data: {
+          success: true,
+          message: 'Deposit confirmation received. Amount will be credited after verification.',
+          newBalance: newBalance.data
+        }
+      };
+    } catch (error) {
+      console.error('Confirm deposit error:', error);
+      return { success: false, error: 'Failed to confirm deposit' };
+    }
   }
 
-  // Withdraw APIs - Static responses
+  // Withdraw APIs
   async requestWithdraw(withdrawData: WithdrawRequest): Promise<ApiResponse<{
     transactionId: string;
     status: string;
     message: string;
     processingTime: string;
   }>> {
-    const transactionId = 'txn_' + Date.now();
-    
-    return this.makeStaticResponse({
-      transactionId: transactionId,
-      status: 'PENDING',
-      message: 'Withdrawal request submitted successfully.',
-      processingTime: '2-4 business hours'
-    });
+    try {
+      const response = await apiService.post(`${this.baseUrl}/withdraw/`, {
+        amount: withdrawData.amount,
+        account_number: withdrawData.accountDetails.accountNumber,
+        ifsc_code: withdrawData.accountDetails.ifscCode,
+        account_holder_name: withdrawData.accountDetails.accountHolderName
+      });
+      
+      return {
+        success: true,
+        data: {
+          transactionId: response.data.id?.toString() || 'txn_' + Date.now(),
+          status: 'PENDING',
+          message: 'Withdrawal request submitted successfully.',
+          processingTime: '2-4 business hours'
+        }
+      };
+    } catch (error) {
+      console.error('Withdraw request error:', error);
+      return { success: false, error: response.data?.error || 'Failed to submit withdrawal request' };
+    }
   }
 
   async cancelWithdraw(transactionId: string): Promise<ApiResponse<{
@@ -207,98 +230,78 @@ class WalletService {
     message: string;
     refundAmount: number;
   }>> {
-    const transaction = staticTransactions.find(txn => txn.id === transactionId);
-    if (transaction && transaction.status === 'PENDING') {
-      return this.makeStaticResponse({
+    try {
+      const response = await apiService.post(`${this.baseUrl}/withdraw/${transactionId}/cancel/`, {});
+      
+      return {
         success: true,
-        message: 'Withdrawal cancelled successfully',
-        refundAmount: Math.abs(transaction.amount)
-      });
+        data: {
+          success: true,
+          message: 'Withdrawal cancelled successfully',
+          refundAmount: response.data.refund_amount || 0
+        }
+      };
+    } catch (error) {
+      console.error('Cancel withdraw error:', error);
+      return { success: false, error: 'Cannot cancel withdrawal' };
     }
-    return { success: false, error: 'Cannot cancel withdrawal' };
   }
 
-  // Bonus APIs - Static responses
-  async getAvailableBonuses(): Promise<ApiResponse<Array<{
-    id: string;
-    title: string;
-    description: string;
-    amount: number;
-    type: 'DEPOSIT_BONUS' | 'REFERRAL_BONUS' | 'WELCOME_BONUS';
-    expiryDate: string;
-    claimed: boolean;
-  }>>> {
-    return this.makeStaticResponse([
-      {
-        id: 'bonus_1',
-        title: 'Welcome Bonus',
-        description: 'Get 100% bonus on your first deposit',
-        amount: 500,
-        type: 'WELCOME_BONUS',
-        expiryDate: '2024-02-15T23:59:59Z',
-        claimed: false
-      },
-      {
-        id: 'bonus_2',
-        title: 'Referral Bonus',
-        description: 'Bonus for referring a friend',
-        amount: 250,
-        type: 'REFERRAL_BONUS',
-        expiryDate: '2024-01-31T23:59:59Z',
-        claimed: true
-      }
-    ]);
+  // Helper methods
+  private mapTransactionType(backendType: string): Transaction['type'] {
+    const typeMap: Record<string, Transaction['type']> = {
+      'deposit': 'DEPOSIT',
+      'withdrawal': 'WITHDRAW',
+      'bet': 'BET_PLACED',
+      'win': 'BET_WON',
+      'loss': 'BET_LOST',
+      'bonus': 'BONUS',
+      'refund': 'REFUND'
+    };
+    
+    return typeMap[backendType?.toLowerCase()] || 'DEPOSIT';
   }
 
-  async claimBonus(bonusId: string): Promise<ApiResponse<{
-    success: boolean;
-    message: string;
-    bonusAmount: number;
-    newBalance: WalletBalance;
-  }>> {
-    return this.makeStaticResponse({
-      success: true,
-      message: 'Bonus claimed successfully',
-      bonusAmount: 500,
-      newBalance: {
-        ...staticBalance,
-        bonus: staticBalance.bonus + 500,
-        totalBalance: staticBalance.totalBalance + 500
-      }
-    });
+  private mapTransactionStatus(backendStatus: string): Transaction['status'] {
+    const statusMap: Record<string, Transaction['status']> = {
+      'pending': 'PENDING',
+      'approved': 'COMPLETED',
+      'completed': 'COMPLETED',
+      'rejected': 'FAILED',
+      'failed': 'FAILED',
+      'cancelled': 'CANCELLED'
+    };
+    
+    return statusMap[backendStatus?.toLowerCase()] || 'PENDING';
   }
 
-  // Payment Methods - Static responses
-  async getPaymentMethods(): Promise<ApiResponse<Array<{
-    id: string;
-    name: string;
-    type: 'UPI' | 'BANK_TRANSFER' | 'CARD';
-    isActive: boolean;
-    details: any;
-  }>>> {
-    return this.makeStaticResponse([
-      {
-        id: 'upi_1',
-        name: 'UPI Payment',
-        type: 'UPI',
-        isActive: true,
-        details: {
-          qrCode: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAYAAAB5fY51...',
-          upiId: 'merchant@paytm'
-        }
-      },
-      {
-        id: 'bank_1',
-        name: 'Bank Transfer',
-        type: 'BANK_TRANSFER',
-        isActive: true,
-        details: {
-          accountNumber: '1234567890',
-          ifscCode: 'ICIC0001234',
-          accountHolderName: 'Dream Big Gaming'
-        }
-      }
-    ]);
+  // Bonus APIs - These would need to be implemented in backend
+  async getAvailableBonuses(): Promise<ApiResponse<Array<any>>> {
+    try {
+      const response = await apiService.get(`${this.baseUrl}/bonuses/`);
+      return { success: true, data: response.data || [] };
+    } catch (error) {
+      return { success: false, error: 'Failed to get bonuses' };
+    }
+  }
+
+  async claimBonus(bonusId: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiService.post(`${this.baseUrl}/bonuses/${bonusId}/claim/`, {});
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, error: 'Failed to claim bonus' };
+    }
+  }
+
+  // Payment Methods - These would need to be implemented in backend
+  async getPaymentMethods(): Promise<ApiResponse<Array<any>>> {
+    try {
+      const response = await apiService.get(`${this.baseUrl}/payment-methods/`);
+      return { success: true, data: response.data || [] };
+    } catch (error) {
+      return { success: false, error: 'Failed to get payment methods' };
+    }
   }
 }
 

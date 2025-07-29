@@ -1,6 +1,4 @@
-
-// API service for handling all API calls
-interface ApiResponse<T> {
+export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
@@ -33,177 +31,104 @@ interface BetData {
   timestamp: Date;
 }
 
-// Static data responses
-const staticResponses = {
-  games: [
-    {
-      id: 1,
-      title: 'Mumbai Day',
-      openTime: '10:00',
-      closeTime: '12:00',
-      status: 'OPEN',
-      color: '#FF6B6B',
-      bgColor: '#FFE5E5'
-    },
-    {
-      id: 2,
-      title: 'Delhi Night',
-      openTime: '21:00',
-      closeTime: '23:00',
-      status: 'CLOSED',
-      color: '#4ECDC4',
-      bgColor: '#E5F9F6'
-    }
-  ],
-  user: {
-    id: 'user_123',
-    username: 'John Doe',
-    phone: '+919876543210',
-    wallet: 5000,
-    winnings: 2500
-  },
-  wallet: {
-    balance: 5000,
-    transactions: [
-      {
-        id: 'txn_1',
-        type: 'DEPOSIT',
-        amount: 1000,
-        status: 'COMPLETED',
-        date: '2024-01-15T10:30:00Z'
-      },
-      {
-        id: 'txn_2',
-        type: 'BET_PLACED',
-        amount: -100,
-        status: 'COMPLETED',
-        date: '2024-01-15T11:00:00Z'
-      }
-    ]
-  }
-};
-
-// API Service for all HTTP requests - Now returns static data
+// API Service for all HTTP requests
 export const apiService = {
-  baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.132.143:8000',
+  baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://f6a6e99e-6f1a-48e3-8f59-ddb95fafc3d4-00-esakm2bltiwd.kirk.replit.dev:8000',
 
-  // Simulate API delay
-  delay: (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms)),
+  // Helper to get auth token
+  getAuthToken: () => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        return localStorage.getItem('authToken') || '';
+      }
+      return '';
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return '';
+    }
+  },
 
-  // GET request - Static response
+  // GET request
   get: async (endpoint: string) => {
     try {
-      await apiService.delay();
-      
-      // Return static data based on endpoint
-      if (endpoint.includes('/games')) {
-        return { data: staticResponses.games };
-      } else if (endpoint.includes('/user') || endpoint.includes('/profile')) {
-        return { data: staticResponses.user };
-      } else if (endpoint.includes('/wallet')) {
-        return { data: staticResponses.wallet };
-      } else if (endpoint.includes('/transactions')) {
-        return { data: staticResponses.wallet.transactions };
-      }
-      
-      return { data: { success: true, message: 'Static response' } };
+      const token = apiService.getAuthToken();
+      const response = await fetch(`${apiService.baseURL}${endpoint}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      const data = await response.json();
+      return { data };
     } catch (error) {
       console.error('API GET Error:', error);
-      return { data: { success: false, error: 'Static API error' } };
+      return { data: { success: false, error: 'Network error' } };
     }
   },
 
-  // POST request - Static response
-  post: async (endpoint: string, data: any) => {
+  // POST request
+  post: async (endpoint: string, postData: any) => {
     try {
-      await apiService.delay();
-      
-      if (endpoint.includes('/login') || endpoint.includes('/register')) {
-        return {
-          data: {
-            success: true,
-            user: staticResponses.user,
-            token: 'static_token_' + Date.now()
-          }
-        };
-      } else if (endpoint.includes('/bet')) {
-        return {
-          data: {
-            success: true,
-            betId: 'bet_' + Date.now(),
-            message: 'Bet placed successfully'
-          }
-        };
-      } else if (endpoint.includes('/deposit')) {
-        return {
-          data: {
-            success: true,
-            transactionId: 'txn_' + Date.now(),
-            message: 'Deposit request submitted'
-          }
-        };
-      } else if (endpoint.includes('/withdraw')) {
-        return {
-          data: {
-            success: true,
-            transactionId: 'txn_' + Date.now(),
-            message: 'Withdrawal request submitted'
-          }
-        };
-      }
-      
-      return {
-        data: {
-          success: true,
-          message: 'Static POST response',
-          id: Date.now()
-        }
-      };
+      const token = apiService.getAuthToken();
+      const response = await fetch(`${apiService.baseURL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+        body: JSON.stringify(postData),
+      });
+
+      const data = await response.json();
+      return { data };
     } catch (error) {
       console.error('API POST Error:', error);
-      return { data: { success: false, error: 'Static API error' } };
+      return { data: { success: false, error: 'Network error' } };
     }
   },
 
-  // PUT request - Static response
-  put: async (endpoint: string, data: any) => {
+  // PUT request
+  put: async (endpoint: string, putData: any) => {
     try {
-      await apiService.delay();
-      
-      return {
-        data: {
-          success: true,
-          message: 'Static PUT response',
-          updatedData: { ...data, updatedAt: new Date().toISOString() }
-        }
-      };
+      const token = apiService.getAuthToken();
+      const response = await fetch(`${apiService.baseURL}${endpoint}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+        body: JSON.stringify(putData),
+      });
+
+      const data = await response.json();
+      return { data };
     } catch (error) {
       console.error('API PUT Error:', error);
-      return { data: { success: false, error: 'Static API error' } };
+      return { data: { success: false, error: 'Network error' } };
     }
   },
 
-  // DELETE request - Static response
+  // DELETE request
   delete: async (endpoint: string) => {
     try {
-      await apiService.delay();
-      
-      return {
-        data: {
-          success: true,
-          message: 'Static DELETE response'
-        }
-      };
+      const token = apiService.getAuthToken();
+      const response = await fetch(`${apiService.baseURL}${endpoint}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      const data = await response.json();
+      return { data };
     } catch (error) {
       console.error('API DELETE Error:', error);
-      return { data: { success: false, error: 'Static API error' } };
+      return { data: { success: false, error: 'Network error' } };
     }
   }
-};
-
-// Helper function to get auth token - Static token
-const getAuthToken = async (): Promise<string> => {
-  return 'static_auth_token_123';
 };
 
 export type { GameData, UserData, BetData, ApiResponse };
