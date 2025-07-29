@@ -10,3 +10,37 @@ run = ["sh", "-c", "node index.js"]
 [[ports]]
 localPort = 8081
 externalPort = 80
+
+[workflows]
+runButton = "Run Both"
+
+[[workflows.workflow]]
+name = "Run Both"
+author = 45709768
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python manage.py runserver 0.0.0.0:8000"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd appgaming && npm run web"
+
+[[workflows.workflow]]
+name = "Run Backend"
+author = 45709768
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python manage.py runserver 0.0.0.0:8000"
+
+[[workflows.workflow]]
+name = "Run Frontend"
+author = 45709768
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd appgaming && npm run web"
