@@ -38,7 +38,7 @@ const staticUserData: UserProfile = {
 };
 
 class UserService {
-  private baseUrl = process.env.EXPO_PUBLIC_API_URL ? `${process.env.EXPO_PUBLIC_API_URL}/api` : 'http://192.168.132.143:8000/api';
+  private baseUrl = process.env.EXPO_PUBLIC_API_URL ? `${process.env.EXPO_PUBLIC_API_URL}/api` : 'https://f6a6e99e-6f1a-48e3-8f59-ddb95fafc3d4-00-esakm2bltiwd.kirk.replit.dev:8000/api';
 
   private async makeStaticResponse<T>(data: T, delay: number = 500): Promise<ApiResponse<T>> {
     return new Promise((resolve) => {
