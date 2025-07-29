@@ -25,7 +25,7 @@ args = "cd backend && python manage.py runserver 0.0.0.0:8000"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd appgaming && npm run web"
+args = "cd appgaming && npm run start"
 
 [[workflows.workflow]]
 name = "Run Backend"
@@ -43,4 +43,4 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd appgaming && npm run web"
+args = "cd appgaming && npm run start"
