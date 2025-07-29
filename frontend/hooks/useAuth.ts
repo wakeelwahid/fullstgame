@@ -180,16 +180,18 @@ export const useAuth = () => {
 
   const register = async (userData: any) => {
     try {
+      console.log('[REGISTER] Function called with userData:', userData);
       setIsLoading(true);
 
       // Validate registration data
       const validation = validateRegistration(userData);
       if (!validation.valid) {
+        console.log('[REGISTER] Validation failed:', validation.error);
         setIsLoading(false);
         return { success: false, error: validation.error };
       }
 
-      console.log('Starting registration with data:', userData);
+      console.log('[REGISTER] Validation passed, starting registration with data:', userData);
       
       // Prepare API payload - mapping to backend expected format
       const registerPayload = {
@@ -200,9 +202,11 @@ export const useAuth = () => {
         referral_code: userData.referralCode || ''
       };
       
-      console.log('Making direct API call to register with payload:', registerPayload);
+      console.log('[REGISTER] Making direct API call to /api/register/ with payload:', registerPayload);
+      console.log('[REGISTER] API URL:', `${apiService.baseURL}/api/register/`);
 
       // Make direct API call to backend
+      console.log('[REGISTER] About to make fetch call...');
       const response = await fetch(`${apiService.baseURL}/api/register/`, {
         method: 'POST',
         headers: {
@@ -211,8 +215,12 @@ export const useAuth = () => {
         body: JSON.stringify(registerPayload),
       });
 
+      console.log('[REGISTER] Fetch completed, response status:', response.status);
+      console.log('[REGISTER] Response headers:', response.headers);
+      
       const data = await response.json();
-      console.log('Registration API response:', data);
+      console.log('[REGISTER] Registration API response data:', data);
+      console.log('[REGISTER] Response.ok:', response.ok);
 
       if (!response.ok) {
         if (response.status === 400) {
