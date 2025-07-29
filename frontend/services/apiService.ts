@@ -167,7 +167,7 @@ export const apiService = {
       const refreshToken = typeof localStorage !== 'undefined' 
         ? localStorage.getItem('refresh_token') 
         : '';
-      
+
       if (!refreshToken) {
         throw new Error('No refresh token available');
       }
@@ -187,7 +187,7 @@ export const apiService = {
         }
         return { success: true, access_token: data.access };
       }
-      
+
       return { success: false };
     } catch (error) {
       console.error('Token refresh error:', error);

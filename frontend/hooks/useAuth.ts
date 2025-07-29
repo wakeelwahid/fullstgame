@@ -118,7 +118,7 @@ export const useAuth = () => {
       };
 
       // Make API call to backend
-      const response = await fetch(`${apiService.baseURL}/login/`, {
+      const response = await fetch(`${apiService.baseURL}/api/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,22 +191,18 @@ export const useAuth = () => {
 
       console.log('Starting registration with data:', userData);
       
-      console.log('Calling userService.register with data:', {
+      const registerPayload = {
         name: userData.name,
         phone: userData.phone,
         email: userData.email || '',
         password: userData.password,
         referralCode: userData.referralCode || ''
-      });
+      };
+      
+      console.log('Calling userService.register with data:', registerPayload);
 
       // Use userService for registration
-      const result = await userService.register({
-        name: userData.name,
-        phone: userData.phone,
-        email: userData.email || '',
-        password: userData.password,
-        referralCode: userData.referralCode || ''
-      });
+      const result = await userService.register(registerPayload);
 
       console.log('userService.register result:', result);
 
