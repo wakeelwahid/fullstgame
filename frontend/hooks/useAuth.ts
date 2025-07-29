@@ -118,7 +118,7 @@ export const useAuth = () => {
       };
 
       // Make API call to backend
-      const response = await fetch(`${apiService.baseURL}/api/login/`, {
+      const response = await fetch(`${apiService.baseURL}/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

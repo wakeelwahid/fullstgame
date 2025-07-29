@@ -64,7 +64,7 @@ class UserService {
   // Authentication APIs
   async login(credentials: LoginCredentials): Promise<ApiResponse<{ user: UserProfile; token: string }>> {
     try {
-      const response = await apiService.post(`${this.baseUrl}/login/`, credentials);
+      const response = await apiService.post(`/login/`, credentials);
 
       if (response.data.access) {
         this.setToken(response.data.access);
@@ -101,7 +101,7 @@ class UserService {
       };
 
       console.log('Sending registration payload:', payload);
-      const response = await apiService.post(`${this.baseUrl}/register/`, payload);
+      const response = await apiService.post(`/register/`, payload);
 
       console.log('Registration response:', response.data);
 
@@ -179,7 +179,7 @@ class UserService {
   // Profile APIs
   async getProfile(): Promise<ApiResponse<UserProfile>> {
     try {
-      const response = await apiService.get(`${this.baseUrl}/profile/`);
+      const response = await apiService.get(`/profile/`);
 
       if (response.data) {
         const user: UserProfile = {
