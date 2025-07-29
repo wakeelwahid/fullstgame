@@ -209,77 +209,9 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  };e: userData.name.trim(),
-        mobile: userData.phone.trim(),
-        email: userData.email?.trim() || '',
-        password: userData.password,
-        confirm_password: userData.confirmPassword,
-        referral_code: userData.referralCode?.trim().toUpperCase() || ''
-      };
-
-      // Make API call to backend
-      const response = await fetch(`${apiService.baseURL}/api/register/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle different types of errors from backend
-        if (response.status === 400) {
-          if (data?.mobile) {
-            return { success: false, error: 'Mobile number already exists. कृपया दूसरा number उपयोग करें।' };
-          } else if (data?.referred_by) {
-            return { success: false, error: 'Invalid referral code. कृपया check करके try करें।' };
-          } else if (data?.username) {
-            return { success: false, error: data.username[0] };
-          } else if (typeof data === 'object') {
-            const firstKey = Object.keys(data)[0];
-            return { success: false, error: data[firstKey] };
-          } else {
-            return { success: false, error: 'Registration failed. कृपया अपनी details check करें।' };
-          }
-        } else {
-          return { success: false, error: 'Registration failed. कृपया बाद में try करें।' };
-        }
-      }
-
-      // If registration successful, create user object
-      const newUser = {
-        id: data.user?.id || Date.now().toString(),
-        name: data.user?.username || userData.name,
-        phone: data.user?.mobile || userData.phone,
-        email: data.user?.email || userData.email || '',
-        kycStatus: 'PENDING',
-        referralCode: data.user?.referral_code || 'REF' + Math.random().toString(36).substr(2, 6).toUpperCase(),
-        walletBalance: data.user?.wallet_balance || 0,
-        isVerified: data.user?.is_verified || false,
-        joinedAt: data.user?.created_at || new Date().toISOString(),
-        referredBy: userData.referralCode || null
-      };
-
-      // Store user data securely
-      await AsyncStorage.setItem('user_data', JSON.stringify(newUser));
-      await AsyncStorage.setItem('auth_token', data.token || 'token_' + Date.now());
-
-      // Update states
-      setUser(newUser);
-      setIsAuthenticated(true);
-
-      console.log('User registered and authenticated successfully:', newUser.name);
-      return { success: true, user: newUser };
-
-    } catch (error) {
-      console.error('Registration error:', error);
-      return { success: false, error: 'Network error. कृपया अपना internet connection check करें।' };
-    } finally {
-      setIsLoading(false);
-    }
   };
+
+      
 
   const logout = async () => {
     try {
