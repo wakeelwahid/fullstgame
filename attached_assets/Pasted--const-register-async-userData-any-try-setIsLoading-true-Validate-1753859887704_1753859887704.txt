@@ -1,0 +1,86 @@
+  const register = async (userData: any) => {
+    try {
+      setIsLoading(true);
+
+      // Validate registration data
+      const validation = validateRegistration(userData);
+      if (!validation.valid) {
+        setIsLoading(false);
+        return { success: false, error: validation.error };
+      }
+
+      // Prepare API payload - mapping to backend expected format
+      const registerPayload = {
+        username: userData.name,
+        mobile: userData.phone,
+        email: userData.email || '',
+        password: userData.password,
+        referral_code: userData.referralCode || ''
+      };
+
+      // Make API call to backend for registration
+      console.log('Making registration API call to:', `${apiService.baseURL}/api/register/`);
+      console.log('Registration payload:', registerPayload);
+      
+      const response = await fetch(`${apiService.baseURL}/api/register/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registerPayload),
+      });
+
+      console.log('Registration response status:', response.status);
+      console.log('Registration response headers:', Object.fromEntries(response.headers.entries()));
+      
+      const data = await response.json();
+      console.log('Registration response data:', data);
+
+      if (!response.ok) {
+        if (response.status === 400) {
+          return { success: false, error: data.error || data.detail || 'Registration details incorrect हैं।' };
+        } else if (response.status === 409) {
+          return { success: false, error: 'यह mobile number या email पहले से registered है।' };
+        } else {
+          return { success: false, error: 'Registration में problem हुई। कृपया बाद में try करें।' };
+        }
+      }
+
+      // If registration successful, create user object
+      const registeredUser = {
+        id: data.user?.id || Date.now().toString(),
+        name: data.user?.username || userData.name,
+        phone: data.user?.mobile || userData.phone,
+        email: data.user?.email || userData.email || '',
+        kycStatus: data.user?.kyc_status || 'PENDING',
+        referralCode: data.user?.referral_code || 'REF' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+        walletBalance: data.user?.wallet_balance || 0,
+        isVerified: data.user?.is_verified || false,
+        joinedAt: data.user?.created_at || new Date().toISOString(),
+        isNewUser: true
+      };
+
+      // Store user data and tokens securely
+      await AsyncStorage.setItem('user_data', JSON.stringify(registeredUser));
+      await AsyncStorage.setItem('access_token', data.access);
+      await AsyncStorage.setItem('refresh_token', data.refresh);
+      
+      // Also store in localStorage for web
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh);
+        localStorage.setItem('user_data', JSON.stringify(registeredUser));
+      }
+
+      // Update states
+      setUser(registeredUser);
+      setIsAuthenticated(true);
+
+      return { success: true, user: registeredUser };
+
+    } catch (error) {
+      return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
