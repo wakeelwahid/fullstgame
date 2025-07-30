@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     # Authentication endpoints
-    path('api/register/', register_user, name='register'),
+    path('register/', register_user, name='register'),
     path('api/login/', login_user, name='login'),
     path('login/', login_user, name='login_user'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
