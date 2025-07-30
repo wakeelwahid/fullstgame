@@ -188,23 +188,58 @@ export const useAuth = () => {
         return { success: false, error: validation.error };
       }
 
-      // Use userService for registration - professional single API call
-      const result = await userService.register({
-        name: userData.name,
-        phone: userData.phone,
+      // Prepare API payload - mapping to backend expected format
+      const registerPayload = {
+        username: userData.name,
+        mobile: userData.phone,
         email: userData.email || '',
         password: userData.password,
-        referralCode: userData.referralCode || ''
-      });
+        referral_code: userData.referralCode || ''
+      };
 
-      if (result.success && result.data) {
+      console.log('Making registration API call to:', `${apiService.baseURL}/register/`);
+      console.log('Registration payload:', registerPayload);
+
+      // Professional single API call using apiService
+      const response = await apiService.post(`/register/`, registerPayload);
+
+      console.log('Registration response:', response.data);
+
+      if (response.data.access) {
         const registeredUser = {
-          ...result.data.user,
+          id: response.data.user?.id?.toString() || '',
+          name: response.data.user?.username || userData.name,
+          phone: response.data.user?.mobile || userData.phone,
+          email: response.data.user?.email || userData.email || '',
+          referralCode: response.data.user?.referral_code || '',
           isNewUser: true
         };
 
-        // Store user data and tokens securely
-        await AsyncStorage.setItem('user_data', JSON.stringify(registeredUser));
+        // Store authentication tokens securely
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('access_token', response.data.access);
+          localStorage.setItem('refresh_token', response.data.refresh);
+          localStorage.setItem('user_data', JSON.stringify(registeredUser));
+        }
+
+        // Update auth states
+        setUser(registeredUser);
+        setIsAuthenticated(true);
+
+        return { success: true, user: registeredUser };
+      }
+
+      return { 
+        success: false, 
+        error: response.data.error || response.data.detail || 'Registration failed' 
+      };
+
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
+    } finally {
+      setIsLoading(false);
+    }eredUser));
         await AsyncStorage.setItem('access_token', result.data.token);
         
         // Also store in localStorage for web

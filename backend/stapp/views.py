@@ -62,6 +62,16 @@ def register_user(request):
             
             print(f"[DEBUG] Extracted fields - username: {username}, mobile: {mobile}, email: {email}, referral_code: {referral_code}")
 
+            # Validation
+            if not username or not mobile or not password:
+                return JsonResponse({'error': 'Username, mobile, and password are required'}, status=400)
+            
+            if len(mobile) != 10 or not mobile.isdigit():
+                return JsonResponse({'error': 'Mobile number must be exactly 10 digits'}, status=400)
+            
+            if len(password) < 6:
+                return JsonResponse({'error': 'Password must be at least 6 characters'}, status=400)
+
             # Check if user already exists
             if User.objects.filter(username=username).exists():
                 return JsonResponse({'error': 'Username already exists'}, status=400)
