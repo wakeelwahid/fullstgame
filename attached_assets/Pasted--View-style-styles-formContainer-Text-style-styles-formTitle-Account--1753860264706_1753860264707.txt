@@ -1,0 +1,115 @@
+  <View style={styles.formContainer}>
+                  <Text style={styles.formTitle}>नया Account बनाएं</Text>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>👤 Full Name *</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Enter your full name"
+                      placeholderTextColor="#666"
+                      value={registerData.name}
+                      onChangeText={(text) =>
+                        setRegisterData({ ...registerData, name: text })
+                      }
+                    />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>📱 Mobile Number *</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="10 digit mobile number"
+                      placeholderTextColor="#666"
+                      value={registerData.phone}
+                      onChangeText={(text) =>
+                        setRegisterData({ ...registerData, phone: text })
+                      }
+                      keyboardType="numeric"
+                      maxLength={10}
+                    />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>📧 Email (Optional)</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Enter your email"
+                      placeholderTextColor="#666"
+                      value={registerData.email}
+                      onChangeText={(text) =>
+                        setRegisterData({ ...registerData, email: text })
+                      }
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>🔒 Password *</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Minimum 6 characters"
+                      placeholderTextColor="#666"
+                      value={registerData.password}
+                      onChangeText={(text) =>
+                        setRegisterData({ ...registerData, password: text })
+                      }
+                      secureTextEntry
+                    />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>🔒 Confirm Password *</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Re-enter your password"
+                      placeholderTextColor="#666"
+                      value={registerData.confirmPassword}
+                      onChangeText={(text) =>
+                        setRegisterData({
+                          ...registerData,
+                          confirmPassword: text,
+                        })
+                      }
+                      secureTextEntry
+                    />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>
+                      🎁 Referral Code (Optional)
+                    </Text>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Enter referral code"
+                      placeholderTextColor="#666"
+                      value={registerData.referralCode}
+                      onChangeText={(text) =>
+                        setRegisterData({
+                          ...registerData,
+                          referralCode: text.toUpperCase(),
+                        })
+                      }
+                      autoCapitalize="characters"
+                    />
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.authButton,
+                      loading && styles.authButtonDisabled,
+                    ]}
+                    onPress={handleRegister}
+                    disabled={loading}
+                  >
+                    <Text style={styles.authButtonText}>
+                      {loading ? "Account बन रहा है..." : "✨ Account बनाएं"}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.termsContainer}>
+                    <Text style={styles.termsText}>
+                      By registering, you agree to our Terms & Conditions
+                    </Text>
+                  </View>
+                </View>
