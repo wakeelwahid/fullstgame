@@ -12,7 +12,6 @@ export const useAuth = () => {
   useEffect(() => {
     const hasValidUser = user && user.id && user.phone;
     setIsAuthenticated(hasValidUser);
-    console.log('Auth state updated:', { hasValidUser, userId: user?.id, userName: user?.name });
   }, [user]);
 
   // Login validation function
@@ -133,6 +132,8 @@ export const useAuth = () => {
           return { success: false, error: 'Invalid mobile number या password। कृपया check करें।' };
         } else if (response.status === 400) {
           return { success: false, error: data.error || 'Login details incorrect हैं।' };
+        } else if (response.status === 403) {
+          return { success: false, error: data.error || 'आपका account block है।' };
         } else {
           return { success: false, error: 'Login में problem हुई। कृपया बाद में try करें।' };
         }
@@ -167,11 +168,9 @@ export const useAuth = () => {
       setUser(loggedInUser);
       setIsAuthenticated(true);
 
-      console.log('User authenticated successfully:', loggedInUser.name, 'ID:', loggedInUser.id);
       return { success: true, user: loggedInUser };
 
     } catch (error) {
-      console.error('Login error:', error);
       return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
     } finally {
       setIsLoading(false);
@@ -180,19 +179,15 @@ export const useAuth = () => {
 
   const register = async (userData: any) => {
     try {
-      console.log('[REGISTER] Function called with userData:', userData);
       setIsLoading(true);
 
       // Validate registration data
       const validation = validateRegistration(userData);
       if (!validation.valid) {
-        console.log('[REGISTER] Validation failed:', validation.error);
         setIsLoading(false);
         return { success: false, error: validation.error };
       }
 
-      console.log('[REGISTER] Validation passed, starting registration with data:', userData);
-      
       // Prepare API payload - mapping to backend expected format
       const registerPayload = {
         username: userData.name,
@@ -201,12 +196,8 @@ export const useAuth = () => {
         password: userData.password,
         referral_code: userData.referralCode || ''
       };
-      
-      console.log('[REGISTER] Making direct API call to /api/register/ with payload:', registerPayload);
-      console.log('[REGISTER] API URL:', `${apiService.baseURL}/api/register/`);
 
-      // Make direct API call to backend
-      console.log('[REGISTER] About to make fetch call...');
+      // Make API call to backend for registration
       const response = await fetch(`${apiService.baseURL}/api/register/`, {
         method: 'POST',
         headers: {
@@ -215,55 +206,52 @@ export const useAuth = () => {
         body: JSON.stringify(registerPayload),
       });
 
-      console.log('[REGISTER] Fetch completed, response status:', response.status);
-      console.log('[REGISTER] Response headers:', response.headers);
-      
       const data = await response.json();
-      console.log('[REGISTER] Response data:', data);
 
-      if (response.ok && data.access) {
-        // Store tokens
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('access_token', data.access);
-          localStorage.setItem('refresh_token', data.refresh);
+      if (!response.ok) {
+        if (response.status === 400) {
+          return { success: false, error: data.error || data.detail || 'Registration details incorrect हैं।' };
+        } else if (response.status === 409) {
+          return { success: false, error: 'यह mobile number या email पहले से registered है।' };
+        } else {
+          return { success: false, error: 'Registration में problem हुई। कृपया बाद में try करें।' };
         }
-
-        // Create user object from registration response
-        const loggedInUser = {
-          id: data.user.id?.toString() || '',
-          name: data.user.username || userData.name,
-          phone: data.user.mobile || userData.phone,
-          email: data.user.email || userData.email || '',
-          referralCode: data.user.referral_code || '',
-          isNewUser: true
-        };
-
-        // Store user data
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('user_data', JSON.stringify(loggedInUser));
-        }
-
-        // Update auth state
-        setUser(loggedInUser);
-        setIsAuthenticated(true);
-
-        console.log('[REGISTER] Registration successful for user:', loggedInUser.name);
-        return { success: true, user: loggedInUser };
-
-      } else {
-        console.error('[REGISTER] Registration failed:', data);
-        return { 
-          success: false, 
-          error: data.error || data.detail || 'Registration failed. Please try again.' 
-        };
       }
 
-    } catch (error) {
-      console.error('[REGISTER] Network/API error:', error);
-      return { 
-        success: false, 
-        error: 'Network error। कृपया अपना internet connection check करें।' 
+      // If registration successful, create user object
+      const registeredUser = {
+        id: data.user?.id || Date.now().toString(),
+        name: data.user?.username || userData.name,
+        phone: data.user?.mobile || userData.phone,
+        email: data.user?.email || userData.email || '',
+        kycStatus: data.user?.kyc_status || 'PENDING',
+        referralCode: data.user?.referral_code || 'REF' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+        walletBalance: data.user?.wallet_balance || 0,
+        isVerified: data.user?.is_verified || false,
+        joinedAt: data.user?.created_at || new Date().toISOString(),
+        isNewUser: true
       };
+
+      // Store user data and tokens securely
+      await AsyncStorage.setItem('user_data', JSON.stringify(registeredUser));
+      await AsyncStorage.setItem('access_token', data.access);
+      await AsyncStorage.setItem('refresh_token', data.refresh);
+      
+      // Also store in localStorage for web
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh);
+        localStorage.setItem('user_data', JSON.stringify(registeredUser));
+      }
+
+      // Update states
+      setUser(registeredUser);
+      setIsAuthenticated(true);
+
+      return { success: true, user: registeredUser };
+
+    } catch (error) {
+      return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
     } finally {
       setIsLoading(false);
     }
@@ -289,7 +277,6 @@ export const useAuth = () => {
       setIsAuthenticated(false);
       setIsLoading(false);
 
-      console.log('Logout successful - all states cleared');
       return { success: true };
     } catch (error) {
       console.error('Logout error:', error);
@@ -335,7 +322,6 @@ export const useAuth = () => {
 
       return { success: false };
     } catch (error) {
-      console.error('Auth check error:', error);
       return { success: false };
     }
   };
@@ -353,7 +339,7 @@ export const useAuth = () => {
           setIsAuthenticated(true);
         }
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        // Silent error handling
       } finally {
         setIsLoading(false);
       }
