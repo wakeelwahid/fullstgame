@@ -33,7 +33,7 @@ interface BetData {
 
 // API Service for all HTTP requests
 export const apiService = {
-  baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://1c54390b-cc54-4bb4-b672-8c22f6a25c1b-00-29hc2bu2j7y3j.riker.replit.dev/:8000',
+  baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://1c54390b-cc54-4bb4-b672-8c22f6a25c1b-00-29hc2bu2j7y3j.riker.replit.dev:8000',
 
   // Helper to get auth token
   getAuthToken: () => {
