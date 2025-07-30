@@ -46,12 +46,21 @@ def generate_referral_code(username, mobile):
 def register_user(request):
     if request.method == 'POST':
         try:
+            print(f"[DEBUG] Registration request received")
+            print(f"[DEBUG] Request method: {request.method}")
+            print(f"[DEBUG] Request headers: {dict(request.headers)}")
+            print(f"[DEBUG] Request body: {request.body.decode('utf-8')}")
+            
             data = json.loads(request.body)
+            print(f"[DEBUG] Parsed data: {data}")
+            
             username = data.get('username')
             mobile = data.get('mobile') or data.get('phone')  # Support both mobile and phone
             email = data.get('email')
             password = data.get('password')
             referral_code = data.get('referral_code') or data.get('referralCode', '')  # Support both formats
+            
+            print(f"[DEBUG] Extracted fields - username: {username}, mobile: {mobile}, email: {email}, referral_code: {referral_code}")
 
             # Check if user already exists
             if User.objects.filter(username=username).exists():

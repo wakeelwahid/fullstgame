@@ -198,6 +198,9 @@ export const useAuth = () => {
       };
 
       // Make API call to backend for registration
+      console.log('Making registration API call to:', `${apiService.baseURL}/api/register/`);
+      console.log('Registration payload:', registerPayload);
+      
       const response = await fetch(`${apiService.baseURL}/api/register/`, {
         method: 'POST',
         headers: {
@@ -206,7 +209,11 @@ export const useAuth = () => {
         body: JSON.stringify(registerPayload),
       });
 
+      console.log('Registration response status:', response.status);
+      console.log('Registration response headers:', Object.fromEntries(response.headers.entries()));
+      
       const data = await response.json();
+      console.log('Registration response data:', data);
 
       if (!response.ok) {
         if (response.status === 400) {
