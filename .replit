@@ -53,19 +53,12 @@ mode = "sequential"
 task = "shell.exec"
 args = "cd appgaming && npm run start"
 
-[[workflows.workflow]]
-name = "Run Frontend Fixed"
-author = 45709768
-mode = "sequential"
+
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd appgaming && expo start --web --host 0.0.0.0 --port 8082"
 
-[[workflows.workflow]]
-name = "Run Both Fixed"
-author = 45709768
-mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -75,10 +68,6 @@ args = "cd backend && python manage.py runserver 0.0.0.0:8000"
 task = "shell.exec"
 args = "cd appgaming && expo start --web --host 0.0.0.0 --port 8082"
 
-[[workflows.workflow]]
-name = "Run Separate Ports"
-author = 45709768
-mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -88,11 +77,6 @@ args = "cd backend && python manage.py runserver 0.0.0.0:8000"
 task = "shell.exec"
 args = "cd appgaming && npm run web"
 
-[[workflows.workflow]]
-name = "Backend Only"
-author = 45709768
-mode = "sequential"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python manage.py runserver 0.0.0.0:8000"
+
+
