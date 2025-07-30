@@ -198,9 +198,6 @@ export const useAuth = () => {
       };
 
       // Make API call to backend for registration
-      console.log('[REGISTER] Making API call to register endpoint');
-      console.log('[REGISTER] Payload:', registerPayload);
-      
       const { response, data } = await apiService.register(registerPayload);
 
       if (!response.ok) {

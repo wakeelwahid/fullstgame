@@ -221,7 +221,6 @@ export const apiService = {
       const data = await response.json();
       return { response, data };
     } catch (error) {
-      console.error('Registration API Error:', error);
       throw error;
     }
   },

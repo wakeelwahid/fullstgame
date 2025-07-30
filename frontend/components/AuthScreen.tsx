@@ -98,8 +98,6 @@ export default function AuthScreen({
   };
 
   const handleRegister = async () => {
-    console.log('Registration attempt with data:', registerData);
-
     // Username validation
     if (!registerData.name || !registerData.name.trim()) {
       Alert.alert("Error", "Username जरूरी है");
@@ -174,11 +172,7 @@ export default function AuthScreen({
 
     setLoading(true);
     try {
-      console.log('Starting registration process...');
-      console.log('Calling register function with data:', registerData);
-
       const result = await register(registerData);
-      console.log('Register function completed with result:', result);
 
       if (result.success && result.user) {
         const userWithNewFlag = { ...result.user, isNewUser: true };
@@ -190,11 +184,9 @@ export default function AuthScreen({
           onAuthSuccess(userWithNewFlag);
         }, 100);
       } else {
-        console.error('Registration failed:', result.error);
         Alert.alert("❌ Registration Error", result.error || "Registration failed. Please try again.");
       }
     } catch (error) {
-      console.error('Registration catch block error:', error);
       Alert.alert("❌ Error", "Network error। कृपया अपना internet connection check करें।");
     } finally {
       setLoading(false);
