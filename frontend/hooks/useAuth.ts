@@ -219,6 +219,82 @@ export const useAuth = () => {
       console.log('[REGISTER] Response headers:', response.headers);
       
       const data = await response.json();
+      console.log('[REGISTER] Response data:', data);
+
+      if (response.ok && data.access) {
+        // Store tokens
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('access_token', data.access);
+          localStorage.setItem('refresh_token', data.refresh);
+        }
+
+        // Create user object from registration response
+        const loggedInUser = {
+          id: data.user.id?.toString() || '',
+          name: data.user.username || userData.name,
+          phone: data.user.mobile || userData.phone,
+          email: data.user.email || userData.email || '',
+          referralCode: data.user.referral_code || '',
+          isNewUser: true
+        };
+
+        // Store user data
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('user_data', JSON.stringify(loggedInUser));
+        }
+
+        // Update auth state
+        setUser(loggedInUser);
+        setIsAuthenticated(true);
+
+        console.log('[REGISTER] Registration successful for user:', loggedInUser.name);
+        return { success: true, user: loggedInUser };
+
+      } else {
+        console.error('[REGISTER] Registration failed:', data);
+        return { 
+          success: false, 
+          error: data.error || data.detail || 'Registration failed. Please try again.' 
+        };
+      }
+
+    } catch (error) {
+      console.error('[REGISTER] Network/API error:', error);
+      return { 
+        success: false, 
+        error: 'Network error। कृपया अपना internet connection check करें।' 
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };sole.log('[REGISTER] Validation passed, starting registration with data:', userData);
+      
+      // Prepare API payload - mapping to backend expected format
+      const registerPayload = {
+        username: userData.name,
+        mobile: userData.phone,
+        email: userData.email || '',
+        password: userData.password,
+        referral_code: userData.referralCode || ''
+      };
+      
+      console.log('[REGISTER] Making direct API call to /api/register/ with payload:', registerPayload);
+      console.log('[REGISTER] API URL:', `${apiService.baseURL}/api/register/`);
+
+      // Make direct API call to backend
+      console.log('[REGISTER] About to make fetch call...');
+      const response = await fetch(`${apiService.baseURL}/api/register/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registerPayload),
+      });
+
+      console.log('[REGISTER] Fetch completed, response status:', response.status);
+      console.log('[REGISTER] Response headers:', response.headers);
+      
+      const data = await response.json();
       console.log('[REGISTER] Registration API response data:', data);
       console.log('[REGISTER] Response.ok:', response.ok);
 
