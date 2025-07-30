@@ -193,7 +193,38 @@ export const apiService = {
       console.error('Token refresh error:', error);
       return { success: false };
     }
-  }
+  },
+
+  // Helper to set auth token
+  setAuthToken: (token: string) => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('access_token', token);
+        localStorage.setItem('authToken', token);
+      }
+    } catch (error) {
+      console.error('Error setting token:', error);
+    }
+  },
+
+  // Registration specific method
+  register: async (userData: any) => {
+    try {
+      const response = await fetch(`${apiService.baseURL}/api/register/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+      return { response, data };
+    } catch (error) {
+      console.error('Registration API Error:', error);
+      throw error;
+    }
+  },
 };
 
 export type { GameData, UserData, BetData, ApiResponse };
