@@ -101,7 +101,9 @@ class UserService {
       };
 
       console.log('Sending registration payload:', payload);
-      const response = await apiService.post(`/api/register/`, payload);
+      
+      // Use apiService.post for consistent API calls
+      const response = await apiService.post(`/register/`, payload);
 
       console.log('Registration response:', response.data);
 
@@ -110,13 +112,13 @@ class UserService {
 
         // Create user profile from response
         const user: UserProfile = {
-          id: response.data.user.id?.toString() || '',
-          name: response.data.user.username || userData.name,
-          phone: response.data.user.mobile || userData.phone,
-          email: response.data.user.email || userData.email || '',
-          referralCode: response.data.user.referral_code || '',
+          id: response.data.user?.id?.toString() || '',
+          name: response.data.user?.username || userData.name,
+          phone: response.data.user?.mobile || userData.phone,
+          email: response.data.user?.email || userData.email || '',
+          referralCode: response.data.user?.referral_code || '',
           kycStatus: 'PENDING',
-          createdAt: new Date().toISOString(),
+          createdAt: response.data.user?.date_joined || new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
 
@@ -134,7 +136,10 @@ class UserService {
         };
       }
 
-      return { success: false, error: response.data.error || response.data.detail || 'Registration failed' };
+      return { 
+        success: false, 
+        error: response.data.error || response.data.detail || 'Registration failed' 
+      };
     } catch (error) {
       console.error('Registration error:', error);
       return { success: false, error: 'Registration failed' };

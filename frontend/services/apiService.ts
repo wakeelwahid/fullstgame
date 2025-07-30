@@ -207,23 +207,7 @@ export const apiService = {
     }
   },
 
-  // Registration specific method
-  register: async (userData: any) => {
-    try {
-      const response = await fetch(`${apiService.baseURL}/api/register/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await response.json();
-      return { response, data };
-    } catch (error) {
-      throw error;
-    }
-  },
+  
 };
 
 export type { GameData, UserData, BetData, ApiResponse };
