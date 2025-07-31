@@ -5,14 +5,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 urlpatterns = [
     # Authentication endpoints
     path('register/', register_user, name='register'),
-    path('api/register/', register_user, name='api_register'),  # Alternative endpoint for consistency
-    path('api/login/', login_user, name='login'),
+   
+    
     path('login/', login_user, name='login_user'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # User endpoints
-    path('api/profile/', get_user_profile, name='get_user_profile'),
+    path('profile/', get_user_profile, name='get_user_profile'),
     path('balance/', get_wallet_balance, name='get_wallet_balance'),
     path('withdraw/', withdraw_request, name='withdraw-request'),
     path('transactions/', transaction_history, name='transaction-history'),

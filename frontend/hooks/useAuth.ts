@@ -230,10 +230,10 @@ export const useAuth = () => {
         referral_code: userData.referralCode || ''
       };
 
-      console.log('Making registration API call to:', `${API_BASE_URL}/register/`);
+      console.log('Making registration API call to:', `${API_BASE_URL}/api/register/`);
 
       // Make API call to backend
-      const response = await fetch(`${API_BASE_URL}/register/`, {
+      const response = await fetch(`${API_BASE_URL}/api/register/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
