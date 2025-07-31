@@ -201,6 +201,9 @@ class AuthService {
         referral_code: userData.referralCode || ''
       };
 
+      console.log('[AUTH_SERVICE] Register payload:', registerPayload);
+      console.log('[AUTH_SERVICE] Register URL:', `${this.API_BASE_URL}/api/register/`);
+
       const response = await fetch(`${this.API_BASE_URL}/api/register/`, {
         method: 'POST',
         headers: {

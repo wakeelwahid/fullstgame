@@ -54,7 +54,7 @@ def register_user(request):
             data = json.loads(request.body)
             print(f"[DEBUG] Parsed data: {data}")
             
-            username = data.get('username')
+            username = data.get('username') or data.get('name')  # Support both username and name
             mobile = data.get('mobile') or data.get('phone')  # Support both mobile and phone
             email = data.get('email')
             password = data.get('password')

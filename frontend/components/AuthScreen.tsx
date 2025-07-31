@@ -170,23 +170,25 @@ export default function AuthScreen({
       return;
     }
 
-    setLoading(true);
     try {
+      setLoading(true);
+      console.log('[REGISTER] Starting registration with data:', registerData);
+
       const result = await register(registerData);
+      console.log('[REGISTER] Registration result:', result);
 
       if (result.success && result.user) {
-        const userWithNewFlag = { ...result.user, isNewUser: true };
-        Alert.alert("✅ Success", "Registration successful! Welcome to DreamBig!");
         // First close the modal
         onClose();
-        // Then trigger auth success
+        // Then trigger auth success which should redirect to home
         setTimeout(() => {
-          onAuthSuccess(userWithNewFlag);
+          handleAuthSuccess({ ...result.user, isNewUser: true });
         }, 100);
       } else {
         Alert.alert("❌ Registration Error", result.error || "Registration failed. Please try again.");
       }
     } catch (error) {
+      console.error('[REGISTER] Registration error:', error);
       Alert.alert("❌ Error", "Network error। कृपया अपना internet connection check करें।");
     } finally {
       setLoading(false);
