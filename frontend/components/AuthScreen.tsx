@@ -32,6 +32,16 @@ export default function AuthScreen({
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Auto-hide error message after 3 seconds
+  React.useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
   const { login, register } = useAuth();
 
   // Reset form data when modal opens or closes
@@ -80,12 +90,14 @@ export default function AuthScreen({
       const result = await login(loginData);
 
       if (result.success && result.user) {
-        // First close the modal
-        onClose();
-        // Then trigger auth success which should redirect to home
+        // Show success message
+        setError('✅ Login Successful! Redirecting...');
+        
+        // Close modal and redirect after 2 seconds
         setTimeout(() => {
+          onClose();
           onAuthSuccess(result.user);
-        }, 100);
+        }, 2000);
       } else {
         setError(result.error || "Login failed. Please try again.");
       }
@@ -109,12 +121,14 @@ export default function AuthScreen({
       console.log('[REGISTER] Registration result:', result);
 
       if (result.success && result.user) {
-        // First close the modal
-        onClose();
-        // Then trigger auth success which should redirect to home
+        // Show success message
+        setError('✅ Registration Successful! Redirecting...');
+        
+        // Close modal and redirect after 2 seconds
         setTimeout(() => {
+          onClose();
           onAuthSuccess({ ...result.user, isNewUser: true });
-        }, 100);
+        }, 2000);
       } else {
         setError(result.error || "Registration failed. Please try again.");
       }
@@ -184,11 +198,7 @@ export default function AuthScreen({
                 </TouchableOpacity>
               </View>
 
-              {error ? (
-                <View style={styles.errorContainer}>
-                  <Text style={styles.errorText}>❌ {error}</Text>
-                </View>
-              ) : null}
+              {/* Error will be shown above buttons now */}
 
               {isLogin ? (
                 <View style={styles.formContainer}>
@@ -226,6 +236,13 @@ export default function AuthScreen({
                       secureTextEntry
                     />
                   </View>
+
+                  {/* Error message above button */}
+                  {error ? (
+                    <View style={styles.errorContainerAboveButton}>
+                      <Text style={styles.errorTextAboveButton}>❌ {error}</Text>
+                    </View>
+                  ) : null}
 
                   <TouchableOpacity
                     style={[
@@ -344,6 +361,13 @@ export default function AuthScreen({
                       autoCapitalize="characters"
                     />
                   </View>
+
+                  {/* Error message above button */}
+                  {error ? (
+                    <View style={styles.errorContainerAboveButton}>
+                      <Text style={styles.errorTextAboveButton}>❌ {error}</Text>
+                    </View>
+                  ) : null}
 
                   <TouchableOpacity
                     style={[
@@ -545,6 +569,21 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#FF6B6B",
     fontSize: 13,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  errorContainerAboveButton: {
+    backgroundColor: "rgba(255, 107, 107, 0.1)",
+    borderWidth: 1,
+    borderColor: "#FF6B6B",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    marginTop: 5,
+  },
+  errorTextAboveButton: {
+    color: "#FF6B6B",
+    fontSize: 12,
     fontWeight: "600",
     textAlign: "center",
   },
