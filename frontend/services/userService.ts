@@ -1,5 +1,8 @@
 import { ApiResponse, apiService } from './apiService';
 
+// Note: Most authentication functionality has been moved to useAuth hook
+// This service now only handles API calls that require authentication
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -11,36 +14,11 @@ export interface UserProfile {
   updatedAt: string;
 }
 
-export interface LoginCredentials {
-  phone: string;
-  password: string;
-}
-
-export interface RegisterData {
-  name: string;
-  phone: string;
-  email?: string;
-  password: string;
-  referralCode?: string;
-}
-
 class UserService {
-  private baseUrl = '';
-
-  private setToken(token: string): void {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('authToken', token);
-      }
-    } catch (error) {
-      console.error('Error setting token:', error);
-    }
-  }
-
   private getToken(): string | null {
     try {
       if (typeof localStorage !== 'undefined') {
-        return localStorage.getItem('authToken');
+        return localStorage.getItem('access_token') || localStorage.getItem('authToken');
       }
       return null;
     } catch (error) {
@@ -49,84 +27,7 @@ class UserService {
     }
   }
 
-
-  private removeToken(): void {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user_data');
-      }
-    } catch (error) {
-      console.error('Error removing token:', error);
-    }
-  }
-
-  // Authentication APIs
-  async login(credentials: LoginCredentials): Promise<ApiResponse<{ user: UserProfile; token: string }>> {
-    try {
-      const response = await apiService.post(`/api/login/`, credentials);
-
-      if (response.data.access) {
-        this.setToken(response.data.access);
-
-        // Get user profile after login
-        const profileResponse = await this.getProfile();
-        if (profileResponse.success && profileResponse.data) {
-          return {
-            success: true,
-            data: {
-              user: profileResponse.data,
-              token: response.data.access
-            }
-          };
-        }
-      }
-
-      return { success: false, error: response.data.detail || 'Login failed' };
-    } catch (error) {
-      console.error('Login error:', error);
-      return { success: false, error: 'Login failed' };
-    }
-  }
-
-  // Registration is now handled by useAuth hook to avoid duplicate calls
-
-  async logout(): Promise<ApiResponse<{ success: boolean }>> {
-    try {
-      this.removeToken();
-      return { success: true, data: { success: true } };
-    } catch (error) {
-      console.error('Error during logout:', error);
-      return { success: false, error: 'Logout failed' };
-    }
-  }
-
-  // Authentication status check
-  async checkAuthStatus(): Promise<ApiResponse<{ user: UserProfile }>> {
-    try {
-      const token = this.getToken();
-      if (!token) {
-        return { success: false, error: 'No authentication found' };
-      }
-
-      // Set the token in apiService before checking profile
-      apiService.setAuthToken(token);
-
-      const profileResponse = await this.getProfile();
-      if (profileResponse.success && profileResponse.data) {
-        return {
-          success: true,
-          data: { user: profileResponse.data }
-        };
-      }
-
-      return { success: false, error: 'Auth check failed' };
-    } catch (error) {
-      return { success: false, error: 'Auth check failed' };
-    }
-  }
-
-  // Profile APIs
+  // Get user profile from backend
   async getProfile(): Promise<ApiResponse<UserProfile>> {
     try {
       const response = await apiService.get(`/api/profile/`);
@@ -143,11 +44,6 @@ class UserService {
           updatedAt: response.data.last_login || new Date().toISOString()
         };
 
-        // Store user data locally
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('user_data', JSON.stringify(user));
-        }
-
         return { success: true, data: user };
       }
 
@@ -158,6 +54,7 @@ class UserService {
     }
   }
 
+  // Update user profile
   async updateProfile(profileData: Partial<UserProfile>): Promise<ApiResponse<UserProfile>> {
     try {
       const updateData = {
@@ -167,7 +64,7 @@ class UserService {
         phone: profileData.phone || ''
       };
 
-      const response = await apiService.put(`${this.baseUrl}/profile/`, updateData);
+      const response = await apiService.put(`/api/profile/`, updateData);
 
       if (response.data) {
         return this.getProfile(); // Return updated profile
@@ -180,9 +77,10 @@ class UserService {
     }
   }
 
+  // Change password
   async changePassword(currentPassword: string, newPassword: string): Promise<ApiResponse<{ success: boolean }>> {
     try {
-      const response = await apiService.post(`${this.baseUrl}/change-password/`, {
+      const response = await apiService.post(`/api/change-password/`, {
         old_password: currentPassword,
         new_password: newPassword
       });
@@ -197,10 +95,10 @@ class UserService {
     }
   }
 
-  // KYC APIs - These would need to be implemented in backend
+  // KYC submission
   async submitKYC(kycData: any): Promise<ApiResponse<{ kycId: string; status: string }>> {
     try {
-      const response = await apiService.post(`${this.baseUrl}/kyc/submit/`, kycData);
+      const response = await apiService.post(`/api/kyc/submit/`, kycData);
       return {
         success: true,
         data: {
@@ -213,9 +111,10 @@ class UserService {
     }
   }
 
+  // Get KYC status
   async getKYCStatus(): Promise<ApiResponse<{ status: string; rejectionReason?: string }>> {
     try {
-      const response = await apiService.get(`${this.baseUrl}/kyc/status/`);
+      const response = await apiService.get(`/api/kyc/status/`);
       return {
         success: true,
         data: {
@@ -227,19 +126,20 @@ class UserService {
     }
   }
 
-  // Referral APIs - These would need to be implemented in backend
+  // Get referral data
   async getReferralData(): Promise<ApiResponse<any>> {
     try {
-      const response = await apiService.get(`${this.baseUrl}/referrals/`);
+      const response = await apiService.get(`/api/referrals/`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, error: 'Failed to get referral data' };
     }
   }
 
+  // Generate new referral code
   async generateNewReferralCode(): Promise<ApiResponse<{ referralCode: string }>> {
     try {
-      const response = await apiService.post(`${this.baseUrl}/referrals/generate-code/`, {});
+      const response = await apiService.post(`/api/referrals/generate-code/`, {});
       return {
         success: true,
         data: { referralCode: response.data.referral_code }

@@ -1,10 +1,38 @@
+
 import { useState, useEffect } from 'react';
-import { userService } from '../services/userService';
-import { apiService } from '../services/apiService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  referralCode: string;
+  kycStatus: 'VERIFIED' | 'PENDING' | 'REJECTED';
+  walletBalance?: number;
+  isVerified?: boolean;
+  joinedAt?: string;
+  isNewUser?: boolean;
+}
+
+export interface LoginCredentials {
+  phone: string;
+  password: string;
+}
+
+export interface RegisterData {
+  name: string;
+  phone: string;
+  email?: string;
+  password: string;
+  confirmPassword?: string;
+  referralCode?: string;
+}
+
+const API_BASE_URL = 'https://0084f960-81d6-49ad-b213-176e01e7ed47-00-104c87rivqu68.kirk.replit.dev:8000';
+
 export const useAuth = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -15,7 +43,7 @@ export const useAuth = () => {
   }, [user]);
 
   // Login validation function
-  const validateCredentials = (credentials: any) => {
+  const validateCredentials = (credentials: LoginCredentials) => {
     if (!credentials.phone || credentials.phone.trim() === '') {
       return { valid: false, error: '📱 Mobile number जरूरी है' };
     }
@@ -38,7 +66,7 @@ export const useAuth = () => {
   };
 
   // Register validation function
-  const validateRegistration = (userData: any) => {
+  const validateRegistration = (userData: RegisterData) => {
     // Username/Name validation
     if (!userData.name || !userData.name.trim()) {
       return { valid: false, error: 'Username जरूरी है' };
@@ -78,12 +106,14 @@ export const useAuth = () => {
       return { valid: false, error: 'Password में कम से कम एक letter और एक number होना चाहिए' };
     }
 
-    // Confirm Password validation
-    if (!userData.confirmPassword || !userData.confirmPassword.trim()) {
-      return { valid: false, error: 'Password confirm करना जरूरी है' };
-    }
-    if (userData.password !== userData.confirmPassword) {
-      return { valid: false, error: 'Password और Confirm Password match नहीं कर रहे' };
+    // Confirm Password validation (if provided)
+    if (userData.confirmPassword !== undefined) {
+      if (!userData.confirmPassword || !userData.confirmPassword.trim()) {
+        return { valid: false, error: 'Password confirm करना जरूरी है' };
+      }
+      if (userData.password !== userData.confirmPassword) {
+        return { valid: false, error: 'Password और Confirm Password match नहीं कर रहे' };
+      }
     }
 
     // Email validation (optional)
@@ -99,7 +129,8 @@ export const useAuth = () => {
     return { valid: true };
   };
 
-  const login = async (credentials: any) => {
+  // Login function
+  const login = async (credentials: LoginCredentials) => {
     try {
       setIsLoading(true);
 
@@ -117,7 +148,7 @@ export const useAuth = () => {
       };
 
       // Make API call to backend
-      const response = await fetch(`${apiService.baseURL}/api/login/`, {
+      const response = await fetch(`${API_BASE_URL}/api/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,8 +171,8 @@ export const useAuth = () => {
       }
 
       // If login successful, create user object
-      const loggedInUser = {
-        id: data.user?.id || Date.now().toString(),
+      const loggedInUser: UserProfile = {
+        id: data.user?.id?.toString() || Date.now().toString(),
         name: data.user?.username || `User ${credentials.phone.slice(-4)}`,
         phone: data.user?.mobile || credentials.phone,
         email: data.user?.email || '',
@@ -171,13 +202,15 @@ export const useAuth = () => {
       return { success: true, user: loggedInUser };
 
     } catch (error) {
+      console.error('Login error:', error);
       return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (userData: any) => {
+  // Register function
+  const register = async (userData: RegisterData) => {
     try {
       setIsLoading(true);
 
@@ -197,28 +230,52 @@ export const useAuth = () => {
         referral_code: userData.referralCode || ''
       };
 
-      console.log('Making registration API call to:', `${apiService.baseURL}/register/`);
-      console.log('Registration payload:', registerPayload);
+      console.log('Making registration API call to:', `${API_BASE_URL}/register/`);
 
-      // Professional single API call using apiService
-      const response = await apiService.post(`/register/`, registerPayload);
+      // Make API call to backend
+      const response = await fetch(`${API_BASE_URL}/register/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registerPayload),
+      });
 
-      console.log('Registration response:', response.data);
+      const data = await response.json();
+      console.log('Registration response:', data);
 
-      if (response.data.access) {
-        const registeredUser = {
-          id: response.data.user?.id?.toString() || '',
-          name: response.data.user?.username || userData.name,
-          phone: response.data.user?.mobile || userData.phone,
-          email: response.data.user?.email || userData.email || '',
-          referralCode: response.data.user?.referral_code || '',
+      if (!response.ok) {
+        if (response.status === 400) {
+          return { success: false, error: data.error || data.detail || 'Registration में problem हुई।' };
+        } else if (response.status === 409) {
+          return { success: false, error: 'यह mobile number पहले से registered है।' };
+        } else {
+          return { success: false, error: 'Registration में problem हुई। कृपया बाद में try करें।' };
+        }
+      }
+
+      if (data.access) {
+        const registeredUser: UserProfile = {
+          id: data.user?.id?.toString() || Date.now().toString(),
+          name: data.user?.username || userData.name,
+          phone: data.user?.mobile || userData.phone,
+          email: data.user?.email || userData.email || '',
+          referralCode: data.user?.referral_code || 'REF' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+          kycStatus: 'PENDING',
+          walletBalance: 0,
+          isVerified: false,
+          joinedAt: new Date().toISOString(),
           isNewUser: true
         };
 
         // Store authentication tokens securely
+        await AsyncStorage.setItem('user_data', JSON.stringify(registeredUser));
+        await AsyncStorage.setItem('access_token', data.access);
+        await AsyncStorage.setItem('refresh_token', data.refresh);
+
         if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('access_token', response.data.access);
-          localStorage.setItem('refresh_token', response.data.refresh);
+          localStorage.setItem('access_token', data.access);
+          localStorage.setItem('refresh_token', data.refresh);
           localStorage.setItem('user_data', JSON.stringify(registeredUser));
         }
 
@@ -231,7 +288,7 @@ export const useAuth = () => {
 
       return { 
         success: false, 
-        error: response.data.error || response.data.detail || 'Registration failed' 
+        error: data.error || data.detail || 'Registration failed' 
       };
 
     } catch (error) {
@@ -242,8 +299,7 @@ export const useAuth = () => {
     }
   };
 
-      
-
+  // Logout function
   const logout = async () => {
     try {
       // Clear all stored data from AsyncStorage
@@ -269,21 +325,29 @@ export const useAuth = () => {
     }
   };
 
-  const updateProfile = async (profileData: any) => {
+  // Update profile function
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
     try {
-      if (!isAuthenticated) {
+      if (!isAuthenticated || !user) {
         return { success: false, error: 'User not authenticated' };
       }
 
       const updatedUser = { ...user, ...profileData };
       await AsyncStorage.setItem('user_data', JSON.stringify(updatedUser));
+      
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('user_data', JSON.stringify(updatedUser));
+      }
+      
       setUser(updatedUser);
       return { success: true, user: updatedUser };
     } catch (error) {
+      console.error('Profile update error:', error);
       return { success: false, error: 'Profile update failed' };
     }
   };
 
+  // Check authentication status
   const checkAuthStatus = async () => {
     try {
       let userData, accessToken;
@@ -307,14 +371,17 @@ export const useAuth = () => {
 
       return { success: false };
     } catch (error) {
+      console.error('Auth check error:', error);
       return { success: false };
     }
   };
 
+  // Check if user is authenticated
   const requireAuth = () => {
     return isAuthenticated;
   };
 
+  // Initialize authentication on app start
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -324,7 +391,7 @@ export const useAuth = () => {
           setIsAuthenticated(true);
         }
       } catch (error) {
-        // Silent error handling
+        console.error('Auth initialization error:', error);
       } finally {
         setIsLoading(false);
       }
@@ -333,11 +400,10 @@ export const useAuth = () => {
     initAuth();
   }, []);
 
-  const loading = isLoading;
   return {
     user,
     isAuthenticated,
-    isLoading: loading,
+    isLoading,
     login,
     register,
     logout,
