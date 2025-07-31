@@ -848,10 +848,7 @@ export default function App() {
         amount: amount,
         type: currentBetTypeState,
         game: selectedGameState?.title || 'Unknown Game',
-        timestamp:
-This edit addresses the `setUser is not defined` error by removing the `setUser` call from `handleAuthSuccess` function in App.tsx.
-```jsx
-      new Date(),
+        timestamp: new Date(),
         status: 'pending' as const
       };
 
