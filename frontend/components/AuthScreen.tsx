@@ -82,17 +82,17 @@ export default function AuthScreen({
 
   const handleLogin = async () => {
     if (loading) return;
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
       const result = await login(loginData);
 
       if (result.success && result.user) {
         // Show success message
         setError('✅ Login Successful! Redirecting...');
-        
+
         // Close modal and redirect after 2 seconds
         setTimeout(() => {
           onClose();
@@ -110,10 +110,10 @@ export default function AuthScreen({
 
   const handleRegister = async () => {
     if (loading) return;
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
       console.log('[REGISTER] Starting registration with data:', registerData);
 
@@ -123,7 +123,7 @@ export default function AuthScreen({
       if (result.success && result.user) {
         // Show success message
         setError('✅ Registration Successful! Redirecting...');
-        
+
         // Close modal and redirect after 2 seconds
         setTimeout(() => {
           onClose();
@@ -140,7 +140,7 @@ export default function AuthScreen({
     }
   };
 
-  
+
 
   return (
     <Modal
@@ -237,10 +237,12 @@ export default function AuthScreen({
                     />
                   </View>
 
-                  {/* Error message above button */}
+                  {/* Error/Success message above button */}
                   {error ? (
-                    <View style={styles.errorContainerAboveButton}>
-                      <Text style={styles.errorTextAboveButton}>❌ {error}</Text>
+                    <View style={error.includes('✅') ? styles.successContainerAboveButton : styles.errorContainerAboveButton}>
+                      <Text style={error.includes('✅') ? styles.successTextAboveButton : styles.errorTextAboveButton}>
+                        {error.includes('✅') ? error : `❌ ${error}`}
+                      </Text>
                     </View>
                   ) : null}
 
@@ -362,10 +364,12 @@ export default function AuthScreen({
                     />
                   </View>
 
-                  {/* Error message above button */}
+                  {/* Error/Success message above button */}
                   {error ? (
-                    <View style={styles.errorContainerAboveButton}>
-                      <Text style={styles.errorTextAboveButton}>❌ {error}</Text>
+                    <View style={error.includes('✅') ? styles.successContainerAboveButton : styles.errorContainerAboveButton}>
+                      <Text style={error.includes('✅') ? styles.successTextAboveButton : styles.errorTextAboveButton}>
+                        {error.includes('✅') ? error : `❌ ${error}`}
+                      </Text>
                     </View>
                   ) : null}
 
@@ -586,6 +590,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     textAlign: "center",
+  },
+  successContainerAboveButton: {
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+    borderWidth: 1,
+    borderColor: '#00FF88',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    marginTop: 5,
+  },
+  successTextAboveButton: {
+    color: '#00FF88',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   divider: {
     flexDirection: "row",
