@@ -1,35 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-export interface UserProfile {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  referralCode: string;
-  kycStatus: 'VERIFIED' | 'PENDING' | 'REJECTED';
-  walletBalance?: number;
-  isVerified?: boolean;
-  joinedAt?: string;
-  isNewUser?: boolean;
-}
-
-export interface LoginCredentials {
-  phone: string;
-  password: string;
-}
-
-export interface RegisterData {
-  name: string;
-  phone: string;
-  email?: string;
-  password: string;
-  confirmPassword?: string;
-  referralCode?: string;
-}
-
-const API_BASE_URL = 'https://0084f960-81d6-49ad-b213-176e01e7ed47-00-104c87rivqu68.kirk.replit.dev:8000';
+import { authService } from '../services/authService';
+import type { UserProfile, LoginCredentials, RegisterData } from '../services/authService';
 
 export const useAuth = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -129,78 +102,28 @@ export const useAuth = () => {
     return { valid: true };
   };
 
-  // Login function
+  // Login function using authService
   const login = async (credentials: LoginCredentials) => {
     try {
       setIsLoading(true);
-
-      // Validate credentials first
-      const validation = validateCredentials(credentials);
-      if (!validation.valid) {
-        setIsLoading(false);
-        return { success: false, error: validation.error };
-      }
-
-      // Prepare API payload
-      const payload = {
-        mobile: credentials.phone.trim(),
-        password: credentials.password
-      };
-
-      // Make API call to backend
-      const response = await fetch(`${API_BASE_URL}/api/login/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          return { success: false, error: 'Invalid mobile number या password। कृपया check करें।' };
-        } else if (response.status === 400) {
-          return { success: false, error: data.error || 'Login details incorrect हैं।' };
-        } else if (response.status === 403) {
-          return { success: false, error: data.error || 'आपका account block है।' };
-        } else {
-          return { success: false, error: 'Login में problem हुई। कृपया बाद में try करें।' };
-        }
-      }
-
-      // If login successful, create user object
-      const loggedInUser: UserProfile = {
-        id: data.user?.id?.toString() || Date.now().toString(),
-        name: data.user?.username || `User ${credentials.phone.slice(-4)}`,
-        phone: data.user?.mobile || credentials.phone,
-        email: data.user?.email || '',
-        kycStatus: data.user?.kyc_status || 'PENDING',
-        referralCode: data.user?.referral_code || 'REF' + Math.random().toString(36).substr(2, 6).toUpperCase(),
-        walletBalance: data.user?.wallet_balance || 0,
-        isVerified: data.user?.is_verified || false,
-        joinedAt: data.user?.created_at || new Date().toISOString()
-      };
-
-      // Store user data and tokens securely
-      await AsyncStorage.setItem('user_data', JSON.stringify(loggedInUser));
-      await AsyncStorage.setItem('access_token', data.access);
-      await AsyncStorage.setItem('refresh_token', data.refresh);
       
-      // Also store in localStorage for web
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('access_token', data.access);
-        localStorage.setItem('refresh_token', data.refresh);
-        localStorage.setItem('user_data', JSON.stringify(loggedInUser));
+      const result = await authService.login(credentials);
+      
+      if (result.success && result.user) {
+        // Store in AsyncStorage for mobile
+        await AsyncStorage.setItem('user_data', JSON.stringify(result.user));
+        await AsyncStorage.setItem('access_token', result.access || '');
+        await AsyncStorage.setItem('refresh_token', result.refresh || '');
+        
+        // Update states
+        setUser(result.user);
+        setIsAuthenticated(true);
+        
+        return { success: true, user: result.user };
       }
-
-      // Update states
-      setUser(loggedInUser);
-      setIsAuthenticated(true);
-
-      return { success: true, user: loggedInUser };
-
+      
+      return { success: false, error: result.error };
+      
     } catch (error) {
       console.error('Login error:', error);
       return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
@@ -209,88 +132,28 @@ export const useAuth = () => {
     }
   };
 
-  // Register function
+  // Register function using authService
   const register = async (userData: RegisterData) => {
     try {
       setIsLoading(true);
-
-      // Validate registration data
-      const validation = validateRegistration(userData);
-      if (!validation.valid) {
-        setIsLoading(false);
-        return { success: false, error: validation.error };
-      }
-
-      // Prepare API payload - mapping to backend expected format
-      const registerPayload = {
-        username: userData.name,
-        mobile: userData.phone,
-        email: userData.email || '',
-        password: userData.password,
-        referral_code: userData.referralCode || ''
-      };
-
-      console.log('Making registration API call to:', `${API_BASE_URL}/api/register/`);
-
-      // Make API call to backend
-      const response = await fetch(`${API_BASE_URL}/api/register/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registerPayload),
-      });
-
-      const data = await response.json();
-      console.log('Registration response:', data);
-
-      if (!response.ok) {
-        if (response.status === 400) {
-          return { success: false, error: data.error || data.detail || 'Registration में problem हुई।' };
-        } else if (response.status === 409) {
-          return { success: false, error: 'यह mobile number पहले से registered है।' };
-        } else {
-          return { success: false, error: 'Registration में problem हुई। कृपया बाद में try करें।' };
-        }
-      }
-
-      if (data.access) {
-        const registeredUser: UserProfile = {
-          id: data.user?.id?.toString() || Date.now().toString(),
-          name: data.user?.username || userData.name,
-          phone: data.user?.mobile || userData.phone,
-          email: data.user?.email || userData.email || '',
-          referralCode: data.user?.referral_code || 'REF' + Math.random().toString(36).substr(2, 6).toUpperCase(),
-          kycStatus: 'PENDING',
-          walletBalance: 0,
-          isVerified: false,
-          joinedAt: new Date().toISOString(),
-          isNewUser: true
-        };
-
-        // Store authentication tokens securely
-        await AsyncStorage.setItem('user_data', JSON.stringify(registeredUser));
-        await AsyncStorage.setItem('access_token', data.access);
-        await AsyncStorage.setItem('refresh_token', data.refresh);
-
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('access_token', data.access);
-          localStorage.setItem('refresh_token', data.refresh);
-          localStorage.setItem('user_data', JSON.stringify(registeredUser));
-        }
-
-        // Update auth states
-        setUser(registeredUser);
+      
+      const result = await authService.register(userData);
+      
+      if (result.success && result.user) {
+        // Store in AsyncStorage for mobile
+        await AsyncStorage.setItem('user_data', JSON.stringify(result.user));
+        await AsyncStorage.setItem('access_token', result.access || '');
+        await AsyncStorage.setItem('refresh_token', result.refresh || '');
+        
+        // Update states
+        setUser({ ...result.user, isNewUser: true });
         setIsAuthenticated(true);
-
-        return { success: true, user: registeredUser };
+        
+        return { success: true, user: result.user };
       }
-
-      return { 
-        success: false, 
-        error: data.error || data.detail || 'Registration failed' 
-      };
-
+      
+      return { success: false, error: result.error };
+      
     } catch (error) {
       console.error('Registration error:', error);
       return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
@@ -299,26 +162,21 @@ export const useAuth = () => {
     }
   };
 
-  // Logout function
+  // Logout function using authService
   const logout = async () => {
     try {
-      // Clear all stored data from AsyncStorage
+      // Clear AsyncStorage
       await AsyncStorage.multiRemove(['user_data', 'auth_token', 'access_token', 'refresh_token']);
-
-      // Clear localStorage for web
-      if (typeof localStorage !== 'undefined') {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('authToken');
-      }
-
-      // Reset all states to initial values
+      
+      // Use authService logout
+      const result = await authService.logout();
+      
+      // Reset states
       setUser(null);
       setIsAuthenticated(false);
       setIsLoading(false);
-
-      return { success: true };
+      
+      return result;
     } catch (error) {
       console.error('Logout error:', error);
       return { success: false, error: 'Logout failed' };
