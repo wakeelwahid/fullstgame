@@ -848,7 +848,10 @@ export default function App() {
         amount: amount,
         type: currentBetTypeState,
         game: selectedGameState?.title || 'Unknown Game',
-        timestamp: new Date(),
+        timestamp:
+This edit addresses the `setUser is not defined` error by removing the `setUser` call from `handleAuthSuccess` function in App.tsx.
+```jsx
+      new Date(),
         status: 'pending' as const
       };
 
@@ -894,7 +897,7 @@ export default function App() {
     // Update all auth states for full app access
     setUserDataState(userData);
     setIsAuthenticatedState(true);
-    setUser(userData); // This updates the useAuth hook state
+    //setUser(userData); // This updates the useAuth hook state
     setShowAuthRequired(false);
     setShowAuthModalState(false);
 

@@ -31,6 +31,7 @@ export default function AuthScreen({
 }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { login, register } = useAuth();
 
   // Reset form data when modal opens or closes
@@ -70,7 +71,11 @@ export default function AuthScreen({
   });
 
   const handleLogin = async () => {
+    if (loading) return;
+    
     setLoading(true);
+    setError('');
+    
     try {
       const result = await login(loginData);
 
@@ -82,23 +87,21 @@ export default function AuthScreen({
           onAuthSuccess(result.user);
         }, 100);
       } else {
-        Alert.alert(
-          "❌ Login Error",
-          result.error || "Login failed. Please try again."
-        );
+        setError(result.error || "Login failed. Please try again.");
       }
     } catch (error) {
-      Alert.alert(
-        "❌ Error",
-        "Network error. कृपया अपना internet connection check करें।"
-      );
+      setError("Network error. कृपया अपना internet connection check करें।");
     } finally {
       setLoading(false);
     }
   };
 
   const handleRegister = async () => {
+    if (loading) return;
+    
     setLoading(true);
+    setError('');
+    
     try {
       console.log('[REGISTER] Starting registration with data:', registerData);
 
@@ -113,11 +116,11 @@ export default function AuthScreen({
           onAuthSuccess({ ...result.user, isNewUser: true });
         }, 100);
       } else {
-        Alert.alert("❌ Registration Error", result.error || "Registration failed. Please try again.");
+        setError(result.error || "Registration failed. Please try again.");
       }
     } catch (error) {
       console.error('[REGISTER] Registration error:', error);
-      Alert.alert("❌ Error", "Network error। कृपया अपना internet connection check करें।");
+      setError("Network error। कृपया अपना internet connection check करें।");
     } finally {
       setLoading(false);
     }
@@ -155,7 +158,10 @@ export default function AuthScreen({
               <View style={styles.tabContainer}>
                 <TouchableOpacity
                   style={[styles.tab, isLogin && styles.activeTab]}
-                  onPress={() => setIsLogin(true)}
+                  onPress={() => {
+                    setIsLogin(true);
+                    setError('');
+                  }}
                 >
                   <Text
                     style={[styles.tabText, isLogin && styles.activeTabText]}
@@ -165,7 +171,10 @@ export default function AuthScreen({
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.tab, !isLogin && styles.activeTab]}
-                  onPress={() => setIsLogin(false)}
+                  onPress={() => {
+                    setIsLogin(false);
+                    setError('');
+                  }}
                 >
                   <Text
                     style={[styles.tabText, !isLogin && styles.activeTabText]}
@@ -174,6 +183,12 @@ export default function AuthScreen({
                   </Text>
                 </TouchableOpacity>
               </View>
+
+              {error ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>❌ {error}</Text>
+                </View>
+              ) : null}
 
               {isLogin ? (
                 <View style={styles.formContainer}>
@@ -188,9 +203,10 @@ export default function AuthScreen({
                       placeholder="10 digit mobile number"
                       placeholderTextColor="#666"
                       value={loginData.phone}
-                      onChangeText={(text) =>
-                        setLoginData({ ...loginData, phone: text })
-                      }
+                      onChangeText={(text) => {
+                        setLoginData({ ...loginData, phone: text });
+                        if (error) setError('');
+                      }}
                       keyboardType="numeric"
                       maxLength={10}
                     />
@@ -203,9 +219,10 @@ export default function AuthScreen({
                       placeholder="Enter your password"
                       placeholderTextColor="#666"
                       value={loginData.password}
-                      onChangeText={(text) =>
-                        setLoginData({ ...loginData, password: text })
-                      }
+                      onChangeText={(text) => {
+                        setLoginData({ ...loginData, password: text });
+                        if (error) setError('');
+                      }}
                       secureTextEntry
                     />
                   </View>
@@ -240,9 +257,10 @@ export default function AuthScreen({
                       placeholder="Enter your full name"
                       placeholderTextColor="#666"
                       value={registerData.name}
-                      onChangeText={(text) =>
-                        setRegisterData({ ...registerData, name: text })
-                      }
+                      onChangeText={(text) => {
+                        setRegisterData({ ...registerData, name: text });
+                        if (error) setError('');
+                      }}
                     />
                   </View>
 
@@ -253,9 +271,10 @@ export default function AuthScreen({
                       placeholder="10 digit mobile number"
                       placeholderTextColor="#666"
                       value={registerData.phone}
-                      onChangeText={(text) =>
-                        setRegisterData({ ...registerData, phone: text })
-                      }
+                      onChangeText={(text) => {
+                        setRegisterData({ ...registerData, phone: text });
+                        if (error) setError('');
+                      }}
                       keyboardType="numeric"
                       maxLength={10}
                     />
@@ -513,6 +532,21 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textAlign: "center",
     lineHeight: 16,
+  },
+  errorContainer: {
+    backgroundColor: "rgba(255, 107, 107, 0.1)",
+    borderWidth: 1,
+    borderColor: "#FF6B6B",
+    borderRadius: 8,
+    padding: 12,
+    marginHorizontal: 12,
+    marginBottom: 10,
+  },
+  errorText: {
+    color: "#FF6B6B",
+    fontSize: 13,
+    fontWeight: "600",
+    textAlign: "center",
   },
   divider: {
     flexDirection: "row",
