@@ -239,28 +239,6 @@ export const useAuth = () => {
       return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
     } finally {
       setIsLoading(false);
-    }eredUser));
-        await AsyncStorage.setItem('access_token', result.data.token);
-        
-        // Also store in localStorage for web
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('access_token', result.data.token);
-          localStorage.setItem('user_data', JSON.stringify(registeredUser));
-        }
-
-        // Update states
-        setUser(registeredUser);
-        setIsAuthenticated(true);
-
-        return { success: true, user: registeredUser };
-      } else {
-        return { success: false, error: result.error || 'Registration failed' };
-      }
-
-    } catch (error) {
-      return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
-    } finally {
-      setIsLoading(false);
     }
   };
 
