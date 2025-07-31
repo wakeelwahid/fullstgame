@@ -136,10 +136,21 @@ export const useAuth = () => {
   const register = async (userData: RegisterData) => {
     try {
       setIsLoading(true);
+      console.log('[USE_AUTH] Starting registration with data:', userData);
+      
+      // Validate before API call
+      const validation = validateRegistration(userData);
+      if (!validation.valid) {
+        console.log('[USE_AUTH] Validation failed:', validation.error);
+        return { success: false, error: validation.error };
+      }
       
       const result = await authService.register(userData);
+      console.log('[USE_AUTH] Registration result received:', result);
       
       if (result.success && result.user) {
+        console.log('[USE_AUTH] Registration successful, storing user data');
+        
         // Store in AsyncStorage for mobile
         await AsyncStorage.setItem('user_data', JSON.stringify(result.user));
         await AsyncStorage.setItem('access_token', result.access || '');
@@ -149,13 +160,15 @@ export const useAuth = () => {
         setUser({ ...result.user, isNewUser: true });
         setIsAuthenticated(true);
         
+        console.log('[USE_AUTH] Registration completed, user state updated');
         return { success: true, user: result.user };
       }
       
+      console.log('[USE_AUTH] Registration failed:', result.error);
       return { success: false, error: result.error };
       
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('[USE_AUTH] Registration error:', error);
       return { success: false, error: 'Network error। कृपया अपना internet connection check करें।' };
     } finally {
       setIsLoading(false);

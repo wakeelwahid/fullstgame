@@ -111,10 +111,12 @@ def register_user(request):
                     'username': user.username,
                     'mobile': user.mobile,
                     'email': user.email,
-                    'referral_code': user.referral_code
+                    'referral_code': user.referral_code,
+                    'kyc_status': 'PENDING',
+                    'is_verified': False,
+                    'created_at': user.date_joined.isoformat() if user.date_joined else None
                 },
-                'message': 'User registered successfully',
-                'referral_code': new_referral_code
+                'message': 'User registered successfully'
             }, status=201)
 
         except json.JSONDecodeError:
