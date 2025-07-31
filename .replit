@@ -40,10 +40,6 @@ name = "Run Backend"
 author = 45709768
 mode = "sequential"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python manage.py runserver 0.0.0.0:8000"
-
 [[workflows.workflow]]
 name = "Run Frontend"
 author = 45709768
@@ -55,27 +51,13 @@ args = "cd appgaming && npm run start"
 
 
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd appgaming && expo start --web --host 0.0.0.0 --port 8082"
-
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd backend && python manage.py runserver 0.0.0.0:8000"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd appgaming && expo start --web --host 0.0.0.0 --port 8082"
 
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python manage.py runserver 0.0.0.0:8000"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd appgaming && npm run web"
 
 
 
