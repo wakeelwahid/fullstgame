@@ -1,35 +1,38 @@
 
 import React from 'react';
-import { SafeAreaView, StatusBar, StyleSheet, Platform } from 'react-native';
-import { COLORS } from '../utils/constants';
+import { SafeAreaView, View, StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface SafeAreaProps {
   children: React.ReactNode;
   backgroundColor?: string;
-  barStyle?: 'default' | 'light-content' | 'dark-content';
 }
 
 const SafeArea: React.FC<SafeAreaProps> = ({ 
   children, 
-  backgroundColor = COLORS.BACKGROUND,
-  barStyle = 'light-content'
+  backgroundColor = '#0a0a0a' 
 }) => {
   return (
-    <>
+    <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <StatusBar 
-        barStyle={barStyle} 
+        barStyle="light-content" 
         backgroundColor={backgroundColor}
         translucent={Platform.OS === 'android'}
       />
-      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+      <View style={[styles.content, { backgroundColor }]}>
         {children}
-      </SafeAreaView>
-    </>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  content: {
     flex: 1,
   },
 });

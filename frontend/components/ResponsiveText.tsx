@@ -1,50 +1,52 @@
 
 import React from 'react';
-import { Text, TextStyle, StyleSheet } from 'react-native';
-import { responsiveFontSize, getDeviceType } from '../utils/helpers';
-import { COLORS, TYPOGRAPHY } from '../utils/constants';
+import { Text, TextStyle, Dimensions } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Mobile-first responsive breakpoints
+const isSmallMobile = SCREEN_WIDTH < 360;
+const isMediumMobile = SCREEN_WIDTH >= 360 && SCREEN_WIDTH < 414;
+const isLargeMobile = SCREEN_WIDTH >= 414;
 
 interface ResponsiveTextProps {
   children: React.ReactNode;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'xxxl';
+  style?: TextStyle | TextStyle[];
+  size?: 'small' | 'medium' | 'large' | 'xlarge';
+  weight?: 'normal' | 'bold';
   color?: string;
-  weight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
-  align?: 'left' | 'center' | 'right' | 'justify';
-  style?: TextStyle;
-  numberOfLines?: number;
-  onPress?: () => void;
 }
 
 const ResponsiveText: React.FC<ResponsiveTextProps> = ({
   children,
-  size = 'md',
-  color = COLORS.TEXT_PRIMARY,
-  weight = 'normal',
-  align = 'left',
   style,
-  numberOfLines,
-  onPress
+  size = 'medium',
+  weight = 'normal',
+  color = '#ffffff'
 }) => {
-  const deviceType = getDeviceType();
-  const fontSize = responsiveFontSize(TYPOGRAPHY.FONT_SIZES[size]);
-  const lineHeight = TYPOGRAPHY.LINE_HEIGHTS[size];
+  const getFontSize = () => {
+    switch (size) {
+      case 'small':
+        return isSmallMobile ? 10 : isMediumMobile ? 11 : 12;
+      case 'medium':
+        return isSmallMobile ? 12 : isMediumMobile ? 13 : 14;
+      case 'large':
+        return isSmallMobile ? 16 : isMediumMobile ? 17 : 18;
+      case 'xlarge':
+        return isSmallMobile ? 20 : isMediumMobile ? 22 : 24;
+      default:
+        return isSmallMobile ? 12 : isMediumMobile ? 13 : 14;
+    }
+  };
 
-  const textStyle: TextStyle = {
-    fontSize,
-    lineHeight,
-    color,
+  const responsiveStyle: TextStyle = {
+    fontSize: getFontSize(),
     fontWeight: weight,
-    textAlign: align,
-    ...style
+    color: color,
   };
 
   return (
-    <Text 
-      style={textStyle}
-      numberOfLines={numberOfLines}
-      onPress={onPress}
-      allowFontScaling={false} // Prevent system font scaling issues
-    >
+    <Text style={[responsiveStyle, style]}>
       {children}
     </Text>
   );
