@@ -1,3 +1,89 @@
+import { Dimensions, PixelRatio } from 'react-native';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Mobile-first responsive breakpoints
+export const isSmallMobile = SCREEN_WIDTH < 360;
+export const isMediumMobile = SCREEN_WIDTH >= 360 && SCREEN_WIDTH < 414;
+export const isLargeMobile = SCREEN_WIDTH >= 414 && SCREEN_WIDTH < 768;
+export const isTablet = SCREEN_WIDTH >= 768;
+
+// Dynamic sizing based on screen size
+export const getResponsiveSize = (small: number, medium: number, large: number) => {
+  if (isSmallMobile) return small;
+  if (isMediumMobile) return medium;
+  return large;
+};
+
+// Responsive width calculation
+export const responsiveWidth = (percentage: number) => {
+  return (SCREEN_WIDTH * percentage) / 100;
+};
+
+// Responsive height calculation
+export const responsiveHeight = (percentage: number) => {
+  return (SCREEN_HEIGHT * percentage) / 100;
+};
+
+// Responsive font size
+export const responsiveFontSize = (size: number) => {
+  const scale = SCREEN_WIDTH / 375; // iPhone 6/7/8 as base
+  const newSize = size * scale;
+
+  if (newSize < size * 0.8) return size * 0.8;
+  if (newSize > size * 1.3) return size * 1.3;
+
+  return Math.round(PixelRatio.roundToNearestPixel(newSize));
+};
+
+// Responsive margin/padding
+export const responsiveSpacing = (baseSize: number) => {
+  if (isSmallMobile) return baseSize * 0.8;
+  if (isMediumMobile) return baseSize;
+  if (isLargeMobile) return baseSize * 1.1;
+  return baseSize * 1.2; // tablet
+};
+
+// Check if device is in landscape mode
+export const isLandscape = () => SCREEN_WIDTH > SCREEN_HEIGHT;
+
+// Safe area calculations
+export const getSafeAreaPadding = () => {
+  if (isSmallMobile) return { top: 20, bottom: 10 };
+  if (isMediumMobile) return { top: 25, bottom: 15 };
+  return { top: 30, bottom: 20 };
+};
+
+// Device type detection
+export const getDeviceType = () => {
+  if (isSmallMobile) return 'small-mobile';
+  if (isMediumMobile) return 'medium-mobile';
+  if (isLargeMobile) return 'large-mobile';
+  return 'tablet';
+};
+
+// Responsive card dimensions
+export const getCardDimensions = () => {
+  const padding = responsiveSpacing(10);
+  const margin = responsiveSpacing(5);
+
+  return {
+    width: responsiveWidth(45) - (padding * 2),
+    height: responsiveHeight(20),
+    padding,
+    margin,
+    borderRadius: responsiveSpacing(8)
+  };
+};
+
+// Mobile-optimized touch targets
+export const getTouchTargetSize = () => {
+  return {
+    minHeight: 44, // iOS Human Interface Guidelines minimum
+    minWidth: 44,
+    padding: responsiveSpacing(12)
+  };
+};
 
 import { COLORS, APP_CONFIG } from './constants';
 

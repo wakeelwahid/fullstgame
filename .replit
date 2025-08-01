@@ -25,41 +25,16 @@ localPort = 8082
 externalPort = 3000
 
 [workflows]
-runButton = "Run Both"
+runButton = "Expo Start"
 
 [[workflows.workflow]]
-name = "Run Both"
-author = 45709768
-mode = "parallel"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python manage.py runserver 0.0.0.0:8000"
+name = "Expo Start"
+author = 45811791
+mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd frontend && npm start"
-
-[[workflows.workflow]]
-name = "Run Backend"
-author = 45709768
-mode = "sequential"
-
-[[workflows.workflow]]
-name = "Run Frontend"
-author = 45709768
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd appgaming && npm run start"
-
-
-
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python manage.py runserver 0.0.0.0:8000"
 
 
 

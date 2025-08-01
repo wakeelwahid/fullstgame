@@ -23,7 +23,18 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "build": {
+        "babel": {
+          "include": [
+            "@expo/vector-icons"
+          ]
+        }
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

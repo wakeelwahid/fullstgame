@@ -39,18 +39,26 @@ import { useWallet } from './hooks/useWallet';
 import AuthScreen from './components/AuthScreen';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const isSmallDevice = SCREEN_WIDTH < 375;
-const isMediumDevice = SCREEN_WIDTH >= 375 && SCREEN_WIDTH < 768;
-const isLargeDevice = SCREEN_WIDTH >= 768;
+
+// Mobile-first responsive breakpoints
+const isSmallMobile = SCREEN_WIDTH < 360;
+const isMediumMobile = SCREEN_WIDTH >= 360 && SCREEN_WIDTH < 414;
+const isLargeMobile = SCREEN_WIDTH >= 414 && SCREEN_WIDTH < 768;
+const isTablet = SCREEN_WIDTH >= 768;
+
+// Dynamic sizing based on screen size
+const getResponsiveSize = (small: number, medium: number, large: number) => {
+  if (isSmallMobile) return small;
+  if (isMediumMobile) return medium;
+  return large;
+};
 
 export default function App() {
   // Auth state
   const { user, isAuthenticated, isLoading, login, register, logout, updateProfile } = useAuth();
-
-  // Use proper authentication state from useAuth hook
   const [showAuthRequired, setShowAuthRequired] = useState(false);
   const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
-    const [appInitialized, setAppInitialized] = useState(false);
+  const [appInitialized, setAppInitialized] = useState(false);
 
   // Wallet state  
   const { wallet, winnings, bonus, addMoney, withdrawMoney } = useWallet();
@@ -630,7 +638,7 @@ export default function App() {
   const gameCards = GAME_CARDS;
   const features = FEATURES;
 
-  // UI state - consolidated to avoid conflicts
+  // UI state - consolidated
   const [activeTabLocal, setActiveTabLocal] = useState('home');
   const [showBettingModalLocal, setShowBettingModalLocal] = useState(false);
   const [showKYCPageLocal, setShowKYCPageLocal] = useState(false);
@@ -653,24 +661,23 @@ export default function App() {
   const [selectedPaymentMethodLocal, setSelectedPaymentMethodLocal] = useState('');
   const [utrNumberLocal, setUtrNumberLocal] = useState('');
   const [activeTabState, setActiveTabState] = useState('home');
-    const [currentViewState, setCurrentViewState] = useState('home');
+  const [currentViewState, setCurrentViewState] = useState('home');
+  const [showResultsModal, setShowResultsModal] = useState(false);
 
   useEffect(() => {
     console.log('App initialized - Age verification will be shown first');
-    // Show age verification after a brief delay
     setTimeout(() => {
       setShowAgeVerificationState(true);
-        setAppInitialized(true);
+      setAppInitialized(true);
     }, 1000);
   }, []);
 
-    // Show login popup when app initializes and user is not authenticated
-    useEffect(() => {
-        if (appInitialized && !isLoading && !isAuthenticated) {
-            setShowAuthModalState(true);
-            setShowAuthRequired(true);
-        }
-    }, [appInitialized, isLoading, isAuthenticated]);
+  useEffect(() => {
+    if (appInitialized && !isLoading && !isAuthenticated) {
+      setShowAuthModalState(true);
+      setShowAuthRequired(true);
+    }
+  }, [appInitialized, isLoading, isAuthenticated]);
 
   const handlePlayNow = (game: any) => {
     setSelectedGameState(game);
@@ -696,7 +703,6 @@ export default function App() {
     setIsAgeVerifiedState(true);
     setShowAgeVerificationState(false);
 
-    // Always show login popup after age verification, regardless of current auth state
     setTimeout(() => {
       setShowAuthModalState(true);
       setShowAuthRequired(true);
@@ -713,50 +719,37 @@ export default function App() {
     if (utrNumberState.length !== 12) {
       return;
     }
-
-    //const amount = parseFloat(depositAmount);
-    //const result = await addMoney(amount, selectedPaymentMethod, utrNumber);
     setShowPaymentModalState(false);
     setShowPaymentSuccessModalState(true);
   };
 
   const handleWithdrawRequest = async (amount: number) => {
-    // Close withdraw modal first
     setShowWithdrawModalState(false);
-
-    // Show withdrawal success page
     setShowWithdrawSuccessModalState(true);
-
-    // Here you can make API call to withdraw money
-    // const result = await withdrawMoney(amount);
-
     console.log('Withdrawal request submitted for amount:', amount);
   };
+
   const handleMenuItemPress = (key: string) => {
-    // Allow access to all pages without authentication check
     setActiveTabLocal(key);
     setActiveTabState(key);
   };
 
   const handleGameSelect = (game: any) => {
     setSelectedGameLocal(game);
-    setSelectedGameState(game); // Also set the state game
-    setBetListState([]); // Clear any previous selections
+    setSelectedGameState(game);
+    setBetListState([]);
     setShowBettingModalLocal(true);
     setShowBettingModalState(true);
   };
 
   const handleNumberSelect = (number: any, type: string, amount: number) => {
-    // Add number to selected list with amount
     const existingBetIndex = betListState.findIndex(b => b.number === number && b.type === type);
 
     if (existingBetIndex >= 0) {
-      // Update existing bet amount
       const updatedBetList = [...betListState];
       updatedBetList[existingBetIndex].amount = amount;
       setBetListState(updatedBetList);
     } else {
-      // Add new bet to list
       const newBet = {
         id: Date.now(),
         number,
@@ -782,15 +775,10 @@ export default function App() {
 
     console.log('Total amount:', totalAmount, 'Current wallet:', currentWallet);
 
-    // For demo purposes, allow bet placement even with insufficient balance
-    // In production, you would validate wallet balance properly
-
-    // Deduct money from wallet (only if sufficient balance)
     if (currentWallet >= totalAmount) {
       withdrawMoney(totalAmount);
     }
 
-    // Create bet records with proper status and timestamp
     const newBets = betListState.map(bet => ({
       ...bet,
       id: Date.now() + Math.random(),
@@ -801,7 +789,6 @@ export default function App() {
       date: new Date().toISOString().split('T')[0]
     }));
 
-    // Set success details for display
     const betDetails = {
       number: betListState.length > 1 ? `${betListState.length} Numbers` : String(betListState[0].number),
       amount: totalAmount,
@@ -810,22 +797,18 @@ export default function App() {
       betCount: betListState.length
     };
 
-    // Add to placed bets and bet history
     setPlacedBetsState(prevBets => [...prevBets, ...newBets]);
     setBetHistoryState(prevHistory => [...prevHistory, ...newBets]);
     setLastBetDetailsState(betDetails);
 
-    // Clear current bet selection
     setBetListState([]);
 
-    // Close betting modal and show success
     setShowBettingModalLocal(false);
     setShowBettingModalState(false);
     setShowBetSuccessState(true);
 
     console.log('Bet placed successfully, success modal should be visible');
 
-    // Auto navigate to Home after 7 seconds
     const timer = setTimeout(() => {
       console.log('Auto navigating to home page');
       setShowBetSuccessState(false);
@@ -840,8 +823,6 @@ export default function App() {
     const currentWallet = parseFloat(wallet.replace('₹', '').replace(',', ''));
 
     if (currentWallet >= amount) {
-      //setWallet(`Rs.${(currentWallet - amount).toFixed(2)}`);
-
       const newBet = {
         id: Date.now(),
         number: selectedNumberState,
@@ -851,14 +832,6 @@ export default function App() {
         timestamp: new Date(),
         status: 'pending' as const
       };
-
-      // Here you can make API call to place bet
-      // const result = await apiService.placeBet({
-      //   gameId: selectedGame.id,
-      //   number: selectedNumber,
-      //   amount,
-      //   type: currentBetType
-      // });
 
       setBetListState([...betListState, newBet]);
       setShowAmountModalState(false);
@@ -872,7 +845,6 @@ export default function App() {
     const bet = betListState.find(b => b.id === betId);
     if (bet) {
       const currentWallet = parseFloat(wallet.replace('₹', '').replace(',', ''));
-      //setWallet(`₹${(currentWallet + bet.amount).toFixed(2)}`);
       setBetListState(betListState.filter(b => b.id !== betId));
     }
   };
@@ -883,7 +855,6 @@ export default function App() {
   };
 
   const handleAuthSuccess = (userData: any) => {
-    // Validate user data before setting
     if (!userData || !userData.phone) {
       Alert.alert('Error', 'Invalid user data received');
       return;
@@ -891,19 +862,15 @@ export default function App() {
 
     console.log('Auth success with user data:', userData);
 
-    // Update all auth states for full app access
     setUserDataState(userData);
     setIsAuthenticatedState(true);
-    //setUser(userData); // This updates the useAuth hook state
     setShowAuthRequired(false);
     setShowAuthModalState(false);
 
-    // Force redirect to home page immediately
     setActiveTabLocal('home');
     setActiveTabState('home');
     setCurrentViewState('home');
 
-    // Show welcome message after successful login
     setTimeout(() => {
       if (userData.isNewUser) {
         Alert.alert(
@@ -924,15 +891,11 @@ export default function App() {
   };
 
   const handleLogin = async () => {
-    // Here you can make API call for login
-    // const result = await apiService.loginUser(phone, password);
     Alert.alert('Login', 'Login functionality to be implemented');
     setShowAuthModalState(false);
   };
 
   const handleRegister = async () => {
-    // Here you can make API call for registration
-    // const result = await apiService.registerUser(userData);
     Alert.alert('Register', 'Registration functionality to be implemented');
     setShowAuthModalState(false);
   };
@@ -942,36 +905,25 @@ export default function App() {
   };
 
   const handleAddCash = async (amount: number) => {
-    // Here you can make API call to add money
-    // const result = await apiService.addMoney(amount);
     setShowAddCashModalState(false);
     setDepositAmountState('');
     Alert.alert('Deposit Successful', `₹${amount} has been added to your wallet. Admin approval pending.`);
   };
 
   const handleWithdraw = async (amount: number) => {
-    // For demo purposes, allow withdrawal regardless of wallet balance
-    // In production, you would validate wallet balance properly
-
-    // Close withdraw modal first
     setShowWithdrawModalState(false);
-
-    // Show withdrawal success modal
     setShowWithdrawSuccessModalState(true);
 
-    // Optional: Deduct from wallet if sufficient balance
     const currentWallet = parseFloat(wallet.replace('₹', '').replace(',', ''));
     if (currentWallet >= amount) {
-      // Here you can make API call to withdraw money
-      // const result = await apiService.withdrawMoney(amount);
-      // setWallet(`₹${(currentWallet - amount).toFixed(2)}`);
+      // API call placeholder
     }
   };
 
   const handleWithdrawSuccessClose = () => {
     setShowWithdrawSuccessModalState(false);
     setWithdrawAmountState('');
-    setActiveTabLocal('wallet'); // Redirect to wallet page to show updated balance
+    setActiveTabLocal('wallet');
   };
 
   const calculateDepositDetails = (amount: number) => {
@@ -993,7 +945,6 @@ export default function App() {
       return;
     }
 
-    // Close payment modal and show success modal
     setShowPaymentModalState(false);
     setShowPaymentSuccessModalState(true);
   };
@@ -1009,13 +960,8 @@ export default function App() {
 
   const handleUpdateProfile = async (profileData: any) => {
     try {
-      // const result = await userService.updateProfile(profileData);
-      // if (result.success) {
       setUserDataState(profileData);
       Alert.alert('Success', 'Profile updated successfully!');
-      // } else {
-      //   Alert.alert('Error', result.error || 'Failed to update profile');
-      // }
     } catch (error) {
       Alert.alert('Error', 'Failed to update profile');
     }
@@ -1032,9 +978,6 @@ export default function App() {
   const handleAgeVerificationAcceptState = async () => {
     setIsAgeVerifiedState(true);
     setShowAgeVerificationState(false);
-
-    // Store verification in AsyncStorage (implement in production)
-    // await AsyncStorage.setItem('ageVerified', 'true');
   };
 
   const handleAgeVerificationReject = () => {
@@ -1045,14 +988,14 @@ export default function App() {
         {
           text: 'Exit App',
           onPress: () => {
-            // In a real app, you might want to close the app
-            // For web, you could redirect to a different page
+            // Close app functionality
           }
         }
       ]
     );
   };
-    const handleViewResults = () => {
+
+  const handleViewResults = () => {
     setShowResultsModal(true);
   };
 
@@ -1078,14 +1021,12 @@ export default function App() {
       case 'wallet':
         return (
           <View style={styles.walletContainer}>
-            {/* Main Balance Display */}
             <View style={styles.mainBalanceCard}>
               <Text style={styles.walletTitle}>💰 My Wallet</Text>
               <Text style={styles.mainBalanceAmount}>{wallet}</Text>
               <Text style={styles.balanceSubtitle}>Total Available Balance</Text>
             </View>
 
-            {/* Quick Actions */}
             <View style={styles.quickActionsRow}>
               <TouchableOpacity
                 style={styles.actionButtonAdd}
@@ -1104,7 +1045,6 @@ export default function App() {
               </TouchableOpacity>
             </View>
 
-            {/* Balance Breakdown - Simplified */}
             <View style={styles.balanceBreakdownSimple}>
               <View style={styles.breakdownItem}>
                 <View style={styles.breakdownLeft}>
@@ -1129,7 +1069,6 @@ export default function App() {
               </View>
             </View>
 
-            {/* Quick Stats */}
             <View style={styles.quickStatsCard}>
               <Text style={styles.quickStatsTitle}>📊 Quick Stats</Text>
               <View style={styles.statsGrid}>
@@ -1161,7 +1100,7 @@ export default function App() {
         return (
           <View style={styles.tabContent}>
             <Text style={styles.tabTitle}>📋 Terms & Conditions</Text>
-            <View style={styles.policyContainer}>
+            <ScrollView style={styles.policyContainer} showsVerticalScrollIndicator={false}>
               <Text style={styles.policySection}>🔞 Age Requirement</Text>
               <Text style={styles.policyText}>• You must be 18+ years old to use this app</Text>
               <Text style={styles.policyText}>• Age verification may be required</Text>
@@ -1187,14 +1126,14 @@ export default function App() {
               <Text style={styles.policyText}>• Creating multiple accounts</Text>
               <Text style={styles.policyText}>• Using automated betting systems</Text>
               <Text style={styles.policyText}>• Attempting to manipulate results</Text>
-            </View>
+            </ScrollView>
           </View>
         );
       case 'privacy':
         return (
           <View style={styles.tabContent}>
             <Text style={styles.tabTitle}>🛡️ Privacy Policy</Text>
-            <View style={styles.policyContainer}>
+            <ScrollView style={styles.policyContainer} showsVerticalScrollIndicator={false}>
               <Text style={styles.policySection}>📋 Information We Collect</Text>
               <Text style={styles.policyText}>• Personal information (name, phone, email)</Text>
               <Text style={styles.policyText}>• Transaction history and betting records</Text>
@@ -1213,7 +1152,7 @@ export default function App() {
 
               <Text style={styles.policySection}>📞 Contact Us</Text>
               <Text style={styles.policyText}>For privacy concerns, contact our support team.</Text>
-            </View>
+            </ScrollView>
           </View>
         );
       case 'refund':
@@ -1222,7 +1161,6 @@ export default function App() {
             <Text style={styles.tabTitle}>💳 Refund Policy</Text>
             <Text style={styles.pageSubtitle}>हमारी refund policy के नियम और शर्तें</Text>
 
-            {/* Important Notice */}
             <View style={styles.noticeContainer}>
               <Text style={styles.noticeIcon}>⚠️</Text>
               <View style={styles.noticeContent}>
@@ -1233,7 +1171,6 @@ export default function App() {
               </View>
             </View>
 
-            {/* Policy Sections */}
             <View style={styles.policyContainer}>
               <Text style={styles.policySection}>📋 Deposit Refund Policy</Text>
               <Text style={styles.policyText}>• Deposit के तुरंत बाद refund नहीं किया जा सकता</Text>
@@ -1248,58 +1185,8 @@ export default function App() {
               <Text style={styles.policyText}>• Technical issue के case में admin द्वारा review</Text>
               <Text style={styles.policyText}>• Wrong number selection की जिम्मेदारी user की है</Text>
               <Text style={styles.policyText}>• Game close होने के बाद bet cancel नहीं हो सकता</Text>
-
-              <Text style={styles.policySection}>💰 Wallet Refund Scenarios</Text>
-              <Text style={styles.policyText}>• Account ban के case में balance refund किया जाएगा</Text>
-              <Text style={styles.policyText}>• Fraud activity detect होने पर no refund</Text>
-              <Text style={styles.policyText}>• User द्वारा account delete पर balance withdrawal</Text>
-              <Text style={styles.policyText}>• Legal issues के case में amount hold</Text>
-              <Text style={styles.policyText}>• KYC incomplete होने पर withdrawal restrictions</Text>
-
-              <Text style={styles.policySection}>⏰ Refund Processing Time</Text>
-              <Text style={styles.policyText}>• UPI refund: 2-24 hours</Text>
-              <Text style={styles.policyText}>• Bank account refund: 3-7 working days</Text>
-              <Text style={styles.policyText}>• Credit/Debit card refund: 5-10 working days</Text>
-              <Text style={styles.policyText}>• E-wallet refund: Instant to 24 hours</Text>
-              <Text style={styles.policyText}>• International payments: 10-15 working days</Text>
-
-              <Text style={styles.policySection}>📝 Refund Request Process</Text>
-              <Text style={styles.policyText}>• Customer support से contact करें</Text>
-              <Text style={styles.policyText}>• Transaction ID और screenshot provide करें</Text>
-              <Text style={styles.policyText}>• Valid reason के साथ request submit करें</Text>
-              <Text style={styles.policyText}>• KYC documents की जरूरत हो सकती है</Text>
-              <Text style={styles.policyText}>• Admin approval के बाद refund processing</Text>
-
-              <Text style={styles.policySection}>❌ Non-Refundable Cases</Text>
-              <Text style={styles.policyText}>• Winning amount dispute करना</Text>
-              <Text style={styles.policyText}>• Fair play violations</Text>
-              <Text style={styles.policyText}>• Multiple account creation</Text>
-              <Text style={styles.policyText}>• Bonus amount misuse</Text>
-              <Text style={styles.policyText}>• Terms & conditions violation</Text>
-
-              <Text style={styles.policySection}>🔄 Partial Refund Conditions</Text>
-              <Text style={styles.policyText}>• Service charges deduction</Text>
-              <Text style={styles.policyText}>• Processing fees deduction</Text>
-              <Text style={styles.policyText}>• GST amount non-refundable</Text>
-              <Text style={styles.policyText}>• Bonus amount adjustment</Text>
-              <Text style={styles.policyText}>• TDS deduction if applicable</Text>
-
-              <Text style={styles.policySection}>📞 Refund Support</Text>
-              <Text style={styles.policyText}>• WhatsApp: +91 98765 43210</Text>
-              <Text style={styles.policyText}>• Telegram: @SattaKingSupport</Text>
-              <Text style={styles.policyText}>• Email: refunds@sattaking.com</Text>
-              <Text style={styles.policyText}>• Support timing: 24x7 available</Text>
-              <Text style={styles.policyText}>• Response time: Within 2 hours</Text>
-
-              <Text style={styles.policySection}>⚖️ Dispute Resolution</Text>
-              <Text style={styles.policyText}>• सभी disputes का final decision admin का होगा</Text>
-              <Text style={styles.policyText}>• Evidence के basis पर decision लिया जाएगा</Text>
-              <Text style={styles.policyText}>• Legal proceedings की case में court jurisdiction</Text>
-              <Text style={styles.policyText}>• Arbitration के through dispute resolution</Text>
-              <Text style={styles.policyText}>• Company के terms के अनुसार final decision</Text>
             </View>
 
-            {/* Contact Section */}
             <View style={styles.contactContainer}>
               <Text style={styles.contactTitle}>🆘 Refund के लिए Help चाहिए?</Text>
               <Text style={styles.contactText}>
@@ -1317,14 +1204,6 @@ export default function App() {
                   <Text style={styles.contactButtonText}>Telegram Support</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-
-            {/* Last Updated */}
-            <View style={styles.lastUpdated}>
-              <Text style={styles.lastUpdatedText}>Last Updated: January 2025</Text>
-              <Text style={styles.lastUpdatedSubtext}>
-                यह policy समय-समय पर update हो सकती है। Latest policy के लिए app check करते रहें।
-              </Text>
             </View>
           </ScrollView>
         );
@@ -1349,15 +1228,13 @@ export default function App() {
         return (
           <View style={styles.tabContent}>
             <Text style={styles.tabTitle}>🆘 Help & Support</Text>
-            <View style={styles.helpContainer}>
+            <ScrollView style={styles.helpContainer} showsVerticalScrollIndicator={false}>
               <Text style={styles.helpWelcome}>हमारी सपोर्ट टीम 24x7 आपकी सेवा में है!</Text>
 
-              {/* Contact Methods */}
               <View style={styles.contactSection}>
                 <Text style={styles.contactTitle}>📱 Contact Us</Text>
 
                 <TouchableOpacity style={styles.contactButton} onPress={() => {
-                  // Open WhatsApp
                   Alert.alert('WhatsApp Support', 'WhatsApp पर संपर्क करने के लिए +91 98765 43210 पर मैसेज करें।');
                 }}>
                   <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
@@ -1369,7 +1246,6 @@ export default function App() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.contactButton} onPress={() => {
-                  // Open Telegram
                   Alert.alert('Telegram Support', 'Telegram पर @SattaKingSupport से संपर्क करें।');
                 }}>
                   <Ionicons name="paper-plane" size={24} color="#0088CC" />
@@ -1381,7 +1257,6 @@ export default function App() {
                 </TouchableOpacity>
               </View>
 
-              {/* FAQ Section */}
               <View style={styles.faqSection}>
                 <Text style={styles.faqTitle}>❓ Frequently Asked Questions</Text>
 
@@ -1411,7 +1286,6 @@ export default function App() {
                 </View>
               </View>
 
-              {/* Quick Actions */}
               <View style={styles.quickActions}>
                 <Text style={styles.quickActionsTitle}>⚡ Quick Actions</Text>
                 <TouchableOpacity style={styles.quickActionButton} onPress={() => setActiveTabLocal('transactions')}>
@@ -1427,7 +1301,7 @@ export default function App() {
                   <Text style={styles.quickActionText}>Check Wallet Balance</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </ScrollView>
           </View>
         );
       default:
@@ -1458,24 +1332,18 @@ export default function App() {
     } else if (key === 'help') {
       setActiveTabLocal('help');
     } else if (key === 'logout') {
-      // Handle logout logic
       logout();
-
-      // Clear all user-related states
       setShowAuthRequired(false);
       setActiveTabLocal('home');
       setActiveTabState('home');
-
-      // Show logout success message
       Alert.alert('✅ Logout Successful', 'आप successfully logout हो गए हैं। अब आप फिर से login कर सकते हैं।');
     }
   };
 
-  const [showResultsModal, setShowResultsModal] = useState(false);
-
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Component */}
+      <StatusBar barStyle="light-content" backgroundColor="#0a0a0a" />
+
       <Header 
         wallet={wallet} 
         onMenuItemPress={handleHeaderMenuItemPress}
@@ -1483,31 +1351,25 @@ export default function App() {
         user={user}
       />
 
-      {/* Content */}
       <View style={[styles.content, !isAgeVerifiedState && styles.blurredContent]}>
         {showKYCPageState ? (
           <KYCPage onBack={() => setShowKYCPageState(false)} />
         ) : (
-          <>
-        {renderContent()}
-                </>
+          renderContent()
         )}
       </View>
 
-      {/* Bottom Menu Component */}
       <BottomMenu
         activeTab={activeTabLocal}
         onMenuItemPress={handleMenuItemPress}
       />
 
-      {/* Age Verification Overlay */}
       {!isAgeVerifiedState && !showAgeVerificationState && (
         <View style={styles.verificationOverlay}>
           <Text style={styles.overlayText}>Age verification required</Text>
         </View>
       )}
 
-      {/* Betting Modal Component */}
       <BettingModal
         visible={showBettingModalState}
         selectedGame={selectedGameState}
@@ -1520,7 +1382,6 @@ export default function App() {
         onPlaceBets={handlePlaceBets}
       />
 
-      {/* Amount Selection Modal */}
       <Modal
         visible={showAmountModalState}
         animationType="fade"
@@ -1583,13 +1444,12 @@ export default function App() {
                 }}
               >
                 <Text style={styles.customAmountButtonText}>Place Custom Bet</Text>
-                            </TouchableOpacity>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Authentication Screen */}
       <AuthScreen 
         visible={showAuthModalState}
         onAuthSuccess={handleAuthSuccess}
@@ -1599,7 +1459,6 @@ export default function App() {
         }}
       />
 
-      {/* Wallet Operations Component */}
       <WalletOperations
         showAddCashModal={showAddCashModalState}
         showWithdrawModal={showWithdrawModalState}
@@ -1619,7 +1478,6 @@ export default function App() {
         onWithdrawRequest={handleWithdraw}
       />
 
-      {/* Payment Success Component */}
       <PaymentSuccess
         visible={showPaymentSuccessModalState}
         amount={depositAmountState && calculateDepositDetails(parseFloat(depositAmountState)).total.toString()}
@@ -1628,7 +1486,6 @@ export default function App() {
         onClose={handlePaymentSuccessClose}
       />
 
-      {/* Withdraw Success Component */}
       <WithdrawSuccess
         visible={showWithdrawSuccessModalState}
         amount={withdrawAmountState}
@@ -1641,12 +1498,12 @@ export default function App() {
         }}
       />
 
-      {/* Age Verification Modal */}
       <AgeVerificationModal
         visible={showAgeVerificationState}
         onAccept={handleAgeVerificationAcceptState}
         onReject={handleAgeVerificationReject}
       />
+
       <BetSuccessModal
         visible={showBetSuccessState}
         betDetails={lastBetDetailsState}
@@ -1660,11 +1517,11 @@ export default function App() {
           }
         }}
       />
-      {/* Results Modal */}
-        <ResultsModal
-          visible={showResultsModal}
-          onClose={() => setShowResultsModal(false)}
-        />
+
+      <ResultsModal
+        visible={showResultsModal}
+        onClose={() => setShowResultsModal(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -1677,86 +1534,91 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  blurredContent: {
+    opacity: 0.3,
+  },
   tabContent: {
     flex: 1,
-    padding: isSmallDevice ? 10 : isMediumDevice ? 15 : 20,
+    padding: getResponsiveSize(10, 15, 20),
     alignItems: 'center',
   },
   tabTitle: {
-    fontSize: isSmallDevice ? 20 : isMediumDevice ? 22 : 24,
+    fontSize: getResponsiveSize(18, 20, 24),
     fontWeight: 'bold',
     color: '#4A90E2',
-    marginBottom: isSmallDevice ? 15 : 20,
+    marginBottom: getResponsiveSize(15, 18, 20),
+    textAlign: 'center',
   },
   walletContainer: {
     flex: 1,
-    padding: isSmallDevice ? 10 : isMediumDevice ? 15 : 20,
+    padding: getResponsiveSize(10, 15, 20),
   },
   mainBalanceCard: {
     backgroundColor: '#1a1a1a',
-    padding: isSmallDevice ? 15 : isMediumDevice ? 20 : 25,
-    borderRadius: isSmallDevice ? 10 : 15,
+    padding: getResponsiveSize(15, 20, 25),
+    borderRadius: getResponsiveSize(10, 12, 15),
     alignItems: 'center',
-    marginBottom: isSmallDevice ? 15 : 20,
+    marginBottom: getResponsiveSize(15, 18, 20),
     borderWidth: 2,
     borderColor: '#4A90E2',
   },
   walletTitle: {
     color: '#4A90E2',
-    fontSize: isSmallDevice ? 16 : 18,
+    fontSize: getResponsiveSize(14, 16, 18),
     fontWeight: 'bold',
     marginBottom: 10,
   },
   mainBalanceAmount: {
-    color: '#00FF88',    fontSize: isSmallDevice ? 24 : isMediumDevice ? 28 : 32,
+    color: '#00FF88',
+    fontSize: getResponsiveSize(24, 28, 32),
     fontWeight: 'bold',
     marginBottom: 5,
   },
   balanceSubtitle: {
     color: '#999',
-    fontSize: isSmallDevice ? 12 : 14,
+    fontSize: getResponsiveSize(11, 12, 14),
   },
   quickActionsRow: {
     flexDirection: 'row',
-    gap: isSmallDevice ? 10 : 15,
-    marginBottom: isSmallDevice ? 15 : 20,
+    gap: getResponsiveSize(8, 12, 15),
+    marginBottom: getResponsiveSize(15, 18, 20),
   },
   actionButtonAdd: {
     flex: 1,
     backgroundColor: '#00FF88',
-    padding: isSmallDevice ? 12 : 15,
-    borderRadius: isSmallDevice ? 8 : 12,
+    padding: getResponsiveSize(12, 14, 15),
+    borderRadius: getResponsiveSize(8, 10, 12),
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: isSmallDevice ? 6 : 8,
-    minHeight: isSmallDevice ? 45 : 50,
+    gap: getResponsiveSize(6, 7, 8),
+    minHeight: getResponsiveSize(44, 48, 50),
   },
   actionButtonWithdraw: {
     flex: 1,
     backgroundColor: '#1a1a1a',
-    padding: isSmallDevice ? 12 : 15,
-    borderRadius: isSmallDevice ? 8 : 12,
+    padding: getResponsiveSize(12, 14, 15),
+    borderRadius: getResponsiveSize(8, 10, 12),
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: isSmallDevice ? 6 : 8,
+    gap: getResponsiveSize(6, 7, 8),
     borderWidth: 1,
     borderColor: '#4A90E2',
-    minHeight: isSmallDevice ? 45 : 50,
+    minHeight: getResponsiveSize(44, 48, 50),
   },
   actionButtonIcon: {
-    fontSize: 18,
+    fontSize: getResponsiveSize(16, 17, 18),
   },
   actionButtonText: {
-    fontSize: 14,
+    fontSize: getResponsiveSize(12, 13, 14),
     fontWeight: 'bold',
   },
   balanceBreakdownSimple: {
     backgroundColor: '#1a1a1a',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 20,
+    borderRadius: getResponsiveSize(10, 11, 12),
+    padding: getResponsiveSize(12, 14, 15),
+    marginBottom: getResponsiveSize(18, 19, 20),
     borderWidth: 1,
     borderColor: '#333',
   },
@@ -1764,49 +1626,49 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: getResponsiveSize(10, 11, 12),
     borderBottomWidth: 1,
     borderBottomColor: '#333',
   },
   breakdownLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: getResponsiveSize(10, 11, 12),
   },
   breakdownIcon: {
-    fontSize: 20,
+    fontSize: getResponsiveSize(18, 19, 20),
   },
   breakdownTitle: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
   },
   breakdownSubtitle: {
     color: '#999',
-    fontSize: 12,
+    fontSize: getResponsiveSize(10, 11, 12),
   },
   breakdownAmount: {
     color: '#00FF88',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
   },
   breakdownAmountBonus: {
     color: '#FFD700',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
   },
   quickStatsCard: {
     backgroundColor: '#1a1a1a',
-    borderRadius: 12,
-    padding: 15,
+    borderRadius: getResponsiveSize(10, 11, 12),
+    padding: getResponsiveSize(12, 14, 15),
     borderWidth: 1,
     borderColor: '#333',
   },
   quickStatsTitle: {
     color: '#4A90E2',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: getResponsiveSize(12, 14, 15),
     textAlign: 'center',
   },
   statsGrid: {
@@ -1818,205 +1680,18 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: '#00FF88',
-    fontSize: 18,
+    fontSize: getResponsiveSize(16, 17, 18),
     fontWeight: 'bold',
     marginBottom: 5,
   },
   statLabel: {
     color: '#999',
-    fontSize: 12,
-  },
-  totalBalanceCard: {
-    backgroundColor: '#1a1a1a',
-    padding: 18,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#4A90E2',
-    width: '100%',
-  },
-  balanceCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 10,
-  },
-  balanceCardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 8,
-  },
-  totalBalanceTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    letterSpacing: 0.5,
-    marginBottom: 8,
-  },
-  totalBalanceAmount: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#00FF88',
-    marginBottom: 4,
-  },
-  totalBalanceSubtitle: {
-    color: '#999',
-    fontSize: 10,
-  },
-  balanceBreakdown: {
-    width: '100%',
-    marginBottom: 30,
-  },
-  balanceItem: {
-    backgroundColor: '#1a1a1a',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  balanceItemTitle: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  balanceItemHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
-  },
-  balanceItemFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 6,
-  },
-  winningsAmount: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#00FF88',
-    marginBottom: 4,
-  },
-  bonusAmount: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFD700',
-    marginBottom: 4,
-  },
-  balanceItemSubtitle: {
-    color: '#999',
-    fontSize: 9,
-    lineHeight: 14,
-  },
-  walletActionsTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    gap: 10,
-    marginBottom: 20,
-    position: 'relative',
-    zIndex: 1,
-  },
-  addCashButton: {
-    flex: 1,
-    backgroundColor: '#00FF88',
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addCashButtonText: {
-    color: '#000',
-    fontSize: 13,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
-  },
-  withdrawButton: {
-    flex: 1,
-    backgroundColor: '#1a1a1a',
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#4A90E2',
-  },
-  withdrawButtonText: {
-    color: '#4A90E2',
-    fontSize: 13,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
-  },
-  historyItem: {
-    backgroundColor: '#1a1a1a',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  historyNumber: {
-    color: '#4A90E2',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  historyGame: {
-    color: '#999',
-    fontSize: 12,
-  },
-  historyAmount: {
-    color: '#00FF88',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  noHistory: {
-    color: '#999',
-    fontSize: 16,
+    fontSize: getResponsiveSize(10, 11, 12),
     textAlign: 'center',
-    marginTop: 50,
-  },
-  profileCard: {
-    backgroundColor: '#1a1a1a',
-    padding: 20,
-    borderRadius: 15,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333',
-    width: '100%',
-  },
-  profileName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    marginBottom: 10,
-  },
-  profilePhone: {
-    color: '#999',
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  profileButton: {
-    backgroundColor: '#4A90E2',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  profileButtonText: {
-    color: '#000',
-    fontSize: 14,
-    fontWeight: 'bold',
   },
   comingSoonText: {
     color: '#999',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     textAlign: 'center',
     marginTop: 20,
   },
@@ -2025,13 +1700,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: isSmallDevice ? 10 : 20,
+    paddingHorizontal: getResponsiveSize(10, 15, 20),
   },
   amountModal: {
     backgroundColor: '#0a0a0a',
-    width: isSmallDevice ? '95%' : '90%',
+    width: '95%',
     maxWidth: 500,
-    borderRadius: isSmallDevice ? 10 : 15,
+    borderRadius: getResponsiveSize(10, 12, 15),
     borderWidth: 1,
     borderColor: '#4A90E2',
   },
@@ -2039,41 +1714,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: isSmallDevice ? 15 : 20,
+    padding: getResponsiveSize(15, 18, 20),
     borderBottomWidth: 1,
     borderBottomColor: '#333',
   },
   modalTitle: {
-    fontSize: isSmallDevice ? 16 : 18,
+    fontSize: getResponsiveSize(16, 17, 18),
     fontWeight: 'bold',
     color: '#4A90E2',
     flex: 1,
   },
   amountContent: {
-    padding: isSmallDevice ? 15 : 20,
+    padding: getResponsiveSize(15, 18, 20),
   },
   betPreview: {
     backgroundColor: '#1a1a1a',
-    padding: isSmallDevice ? 12 : 15,
-    borderRadius: isSmallDevice ? 8 : 10,
-    marginBottom: isSmallDevice ? 15 : 20,
+    padding: getResponsiveSize(12, 14, 15),
+    borderRadius: getResponsiveSize(8, 9, 10),
+    marginBottom: getResponsiveSize(15, 18, 20),
     borderWidth: 1,
     borderColor: '#333',
     alignItems: 'center',
   },
   betPreviewText: {
     color: '#4A90E2',
-    fontSize: isSmallDevice ? 14 : 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
     marginBottom: 5,
   },
   betPreviewGame: {
     color: '#999',
-    fontSize: isSmallDevice ? 10 : 12,
+    fontSize: getResponsiveSize(10, 11, 12),
   },
   amountLabel: {
     color: '#4A90E2',
-    fontSize: isSmallDevice ? 12 : 14,
+    fontSize: getResponsiveSize(12, 13, 14),
     fontWeight: 'bold',
     marginBottom: 10,
   },
@@ -2081,442 +1756,168 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: isSmallDevice ? 15 : 20,
+    marginBottom: getResponsiveSize(15, 18, 20),
   },
   amountButton: {
-    width: isSmallDevice ? '31%' : '30%',
+    width: '31%',
     backgroundColor: '#1a1a1a',
-    paddingVertical: isSmallDevice ? 10 : 12,
-    borderRadius: isSmallDevice ? 6 : 8,
+    paddingVertical: getResponsiveSize(10, 11, 12),
+    borderRadius: getResponsiveSize(6, 7, 8),
     alignItems: 'center',
-    marginBottom: isSmallDevice ? 6 : 8,
+    marginBottom: getResponsiveSize(6, 7, 8),
     borderWidth: 1,
     borderColor: '#00FF88',
-    minHeight: isSmallDevice ? 35 : 40,
+    minHeight: getResponsiveSize(35, 38, 40),
   },
   amountButtonText: {
     color: '#00FF88',
-    fontSize: isSmallDevice ? 12 : 14,
+    fontSize: getResponsiveSize(12, 13, 14),
     fontWeight: 'bold',
   },
   customAmountInput: {
     backgroundColor: '#1a1a1a',
     borderWidth: 1,
     borderColor: '#333',
-    borderRadius: isSmallDevice ? 6 : 8,
-    paddingHorizontal: isSmallDevice ? 12 : 15,
-    paddingVertical: isSmallDevice ? 10 : 12,
+    borderRadius: getResponsiveSize(6, 7, 8),
+    paddingHorizontal: getResponsiveSize(12, 14, 15),
+    paddingVertical: getResponsiveSize(10, 11, 12),
     color: '#fff',
-    fontSize: isSmallDevice ? 14 : 16,
-    marginBottom: isSmallDevice ? 12 : 15,
-    minHeight: isSmallDevice ? 40 : 45,
+    fontSize: getResponsiveSize(14, 15, 16),
+    marginBottom: getResponsiveSize(12, 14, 15),
+    minHeight: getResponsiveSize(40, 42, 45),
   },
   customAmountButton: {
     backgroundColor: '#4A90E2',
-    paddingVertical: isSmallDevice ? 12 : 15,
-    borderRadius: isSmallDevice ? 6 : 8,
+    paddingVertical: getResponsiveSize(12, 14, 15),
+    borderRadius: getResponsiveSize(6, 7, 8),
     alignItems: 'center',
-    minHeight: isSmallDevice ? 40 : 45,
+    minHeight: getResponsiveSize(40, 42, 45),
   },
   customAmountButtonText: {
     color: '#000',
-    fontSize: isSmallDevice ? 12 : 14,
+    fontSize: getResponsiveSize(12, 13, 14),
     fontWeight: 'bold',
   },
-  authModalContainer: {
-    backgroundColor: '#0a0a0a',
-    width: '95%',
-    maxHeight: '90%',
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#4A90E2',
-  },
-  authModalContent: {
-    flex: 1,
-    padding: 20,
-  },
-  formContainer: {
-    flex: 1,
-  },
-  formTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    textAlign: 'center',
-    marginBottom: 25,
-  },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  inputLabel: {
-    color: '#4A90E2',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  textInput: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#333',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    color: '#fff',
-    fontSize: 16,
-  },
-  submitButton: {
-    backgroundColor: '#4A90E2',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 15,
-    marginBottom: 12,
-  },
-  submitButtonText: {
-    color: '#000',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  switchModeText: {
-    color: '#00FF88',
-    fontSize: 14,
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-  },
-  referBenefitsContainer: {
-    marginBottom: 20,
-  },
-  benefitItem: {
-    backgroundColor: '#1a1a1a',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    borderLeftWidth: 4,
-    borderLeftColor: '#FFD700',
-  },
-  benefitTitle: {
-    color: '#FFD700',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  benefitDescription: {
-    color: '#ccc',
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  referralStatsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 25,
-  },
-  statCard: {
-    backgroundColor: '#1a1a1a',
-    padding: 15,
-    borderRadius: 12,
-    width: '48%',
-    marginBottom: 10,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  statMainNumber: {
-    color: '#00FF88',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  statMainLabel: {
-    color: '#999',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  referralCodeSection: {
-    backgroundColor: '#1a1a1a',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 25,
-    borderWidth: 1,
-    borderColor: '#4A90E2',
-  },
-  referralCodeTitle: {
-    color: '#FFD700',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-  referralCodeSubtitle: {
-    color: '#999',
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  codeDisplayContainer: {
-    backgroundColor: '#2a2a2a',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#4A90E2',
-  },
-  referralCodeDisplay: {
-    color: '#00FF88',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    letterSpacing: 2,
-  },
-  referralActions: {
-    gap: 10,
-  },
-  copyCodeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFD700',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  copyCodeText: {
-    color: '#000',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  shareWhatsAppButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#25D366',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  shareWhatsAppText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  shareTelegramButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#0088CC',
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  shareTelegramText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  howItWorksSection: {
-    backgroundColor: '#1a1a1a',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 25,
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  howItWorksTitle: {
-    color: '#FFD700',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  stepsContainer: {
-    gap: 15,
-  },
-  workStep: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 15,
-  },
-  workStepNumber: {
-    backgroundColor: '#4A90E2',
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    textAlign: 'center',
-    lineHeight: 30,
-  },
-  workStepContent: {
-    flex: 1,
-  },
-  workStepTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  workStepDescription: {
-    color: '#999',
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  commissionStructure: {
-    backgroundColor: '#1a1a1a',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#00FF88',
-  },
-  commissionTitle: {
-    color: '#FFD700',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  commissionItems: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  commissionItem: {
-    alignItems: 'center',
-  },
-  commissionAmount: {
-    color: '#00FF88',
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  commissionLabel: {
-    color: '#999',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-
   // Policy & Terms Styles
   policyContainer: {
     width: '100%',
-    paddingHorizontal: 10,
+    paddingHorizontal: getResponsiveSize(8, 10, 12),
   },
   policySection: {
     color: '#FFD700',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
+    marginTop: getResponsiveSize(18, 19, 20),
+    marginBottom: getResponsiveSize(8, 9, 10),
   },
   policyText: {
     color: '#fff',
-    fontSize: 14,
-    marginBottom: 8,
-    lineHeight: 20,
-    paddingLeft: 10,
+    fontSize: getResponsiveSize(12, 13, 14),
+    marginBottom: getResponsiveSize(6, 7, 8),
+    lineHeight: getResponsiveSize(18, 19, 20),
+    paddingLeft: getResponsiveSize(8, 9, 10),
   },
-
   // Help & Support Styles
   helpContainer: {
     width: '100%',
-    paddingHorizontal: 10,
+    paddingHorizontal: getResponsiveSize(8, 10, 12),
   },
   helpWelcome: {
     color: '#00FF88',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: getResponsiveSize(18, 19, 20),
   },
   contactSection: {
-    marginBottom: 25,
+    marginBottom: getResponsiveSize(22, 24, 25),
   },
   contactTitle: {
     color: '#FFD700',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: getResponsiveSize(12, 14, 15),
   },
   contactButton: {
     flexDirection: 'row',
     backgroundColor: '#1a1a1a',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 12,
+    padding: getResponsiveSize(12, 14, 15),
+    borderRadius: getResponsiveSize(10, 11, 12),
+    marginBottom: getResponsiveSize(10, 11, 12),
     borderWidth: 1,
     borderColor: '#333',
     alignItems: 'center',
   },
   contactInfo: {
-    marginLeft: 15,
+    marginLeft: getResponsiveSize(12, 14, 15),
     flex: 1,
-  },  contactMethod: {
+  },
+  contactMethod: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
     marginBottom: 2,
   },
   contactDetails: {
     color: '#4A90E2',
-    fontSize: 14,
+    fontSize: getResponsiveSize(12, 13, 14),
     marginBottom: 2,
   },
   contactTiming: {
     color: '#00FF88',
-    fontSize: 12,
+    fontSize: getResponsiveSize(10, 11, 12),
   },
   faqSection: {
-    marginBottom: 25,
+    marginBottom: getResponsiveSize(22, 24, 25),
   },
   faqTitle: {
     color: '#FFD700',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: getResponsiveSize(12, 14, 15),
   },
   faqItem: {
     backgroundColor: '#1a1a1a',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
+    padding: getResponsiveSize(12, 14, 15),
+    borderRadius: getResponsiveSize(8, 9, 10),
+    marginBottom: getResponsiveSize(8, 9, 10),
     borderWidth: 1,
     borderColor: '#333',
   },
   faqQuestion: {
     color: '#4A90E2',
-    fontSize: 14,
+    fontSize: getResponsiveSize(12, 13, 14),
     fontWeight: 'bold',
     marginBottom: 5,
   },
   faqAnswer: {
     color: '#fff',
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: getResponsiveSize(11, 12, 13),
+    lineHeight: getResponsiveSize(16, 17, 18),
   },
   quickActions: {
-    marginBottom: 20,
+    marginBottom: getResponsiveSize(18, 19, 20),
   },
   quickActionsTitle: {
     color: '#FFD700',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: getResponsiveSize(12, 14, 15),
   },
   quickActionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#1a1a1a',
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 8,
+    padding: getResponsiveSize(10, 11, 12),
+    borderRadius: getResponsiveSize(8, 9, 10),
+    marginBottom: getResponsiveSize(6, 7, 8),
     borderWidth: 1,
     borderColor: '#333',
   },
   quickActionText: {
     color: '#fff',
-    fontSize: 14,
-    marginLeft: 10,
+    fontSize: getResponsiveSize(12, 13, 14),
+    marginLeft: getResponsiveSize(8, 9, 10),
   },
   verificationOverlay: {
     position: 'absolute',
@@ -2529,7 +1930,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   overlayText: {
-    fontSize: 20,
+    fontSize: getResponsiveSize(18, 19, 20),
     color: 'white',
     fontWeight: 'bold',
   },
@@ -2537,172 +1938,79 @@ const styles = StyleSheet.create({
   refundContainer: {
     flex: 1,
     backgroundColor: '#0a0a0a',
-    padding: isSmallDevice ? 15 : 20,
+    padding: getResponsiveSize(12, 15, 20),
   },
   pageSubtitle: {
-    fontSize: isSmallDevice ? 14 : 16,
+    fontSize: getResponsiveSize(12, 14, 16),
     color: '#999',
     textAlign: 'center',
-    marginBottom: 25,
+    marginBottom: getResponsiveSize(22, 24, 25),
   },
   noticeContainer: {
     flexDirection: 'row',
     backgroundColor: '#2a1a00',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 25,
+    padding: getResponsiveSize(12, 14, 15),
+    borderRadius: getResponsiveSize(8, 9, 10),
+    marginBottom: getResponsiveSize(22, 24, 25),
     borderWidth: 1,
     borderColor: '#FFD700',
   },
   noticeIcon: {
-    fontSize: 24,
-    marginRight: 15,
+    fontSize: getResponsiveSize(20, 22, 24),
+    marginRight: getResponsiveSize(12, 14, 15),
   },
   noticeContent: {
     flex: 1,
   },
   noticeTitle: {
     color: '#FFD700',
-    fontSize: 16,
+    fontSize: getResponsiveSize(14, 15, 16),
     fontWeight: 'bold',
     marginBottom: 5,
   },
   noticeText: {
     color: '#fff',
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: getResponsiveSize(12, 13, 14),
+    lineHeight: getResponsiveSize(18, 19, 20),
   },
   contactContainer: {
     backgroundColor: '#1a1a1a',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 25,
+    padding: getResponsiveSize(18, 19, 20),
+    borderRadius: getResponsiveSize(12, 14, 15),
+    marginBottom: getResponsiveSize(22, 24, 25),
     borderWidth: 1,
     borderColor: '#4A90E2',
   },
-  contactTitle: {
-    color: '#4A90E2',
-    fontSize: isSmallDevice ? 16 : 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 15,
-  },
   contactText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: getResponsiveSize(12, 13, 14),
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 20,
+    lineHeight: getResponsiveSize(18, 19, 20),
+    marginBottom: getResponsiveSize(18, 19, 20),
   },
   contactButtons: {
-    gap: 10,
+    gap: getResponsiveSize(8, 9, 10),
   },
   whatsappButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#25D366',
-    padding: 12,
-    borderRadius: 8,
+    padding: getResponsiveSize(10, 11, 12),
+    borderRadius: getResponsiveSize(6, 7, 8),
   },
   telegramButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#0088CC',
-    padding: 12,
-    borderRadius: 8,
+    padding: getResponsiveSize(10, 11, 12),
+    borderRadius: getResponsiveSize(6, 7, 8),
   },
   contactButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: getResponsiveSize(12, 13, 14),
     fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  lastUpdated: {
-    backgroundColor: '#1a1a1a',
-    padding: 15,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#333',
-    alignItems: 'center',
-  },
-  lastUpdatedText: {
-    color: '#4A90E2',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  lastUpdatedSubtext: {
-    color: '#999',
-    fontSize: 12,
-    textAlign: 'center',
-    lineHeight: 16,
-  },
-
-  // Authentication Required Styles
-  authRequiredContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#0a0a0a',
-  },
-  authRequiredCard: {
-    backgroundColor: '#1a1a1a',
-    padding: 30,
-    borderRadius: 20,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#4A90E2',
-    maxWidth: 350,
-    width: '100%',
-    position: 'relative',
-  },
-  authRequiredCloseButton: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    zIndex: 1,
-  },
-  authRequiredIcon: {
-    fontSize: 48,
-    marginBottom: 20,
-  },
-  authRequiredTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  authRequiredMessage: {
-    fontSize: 16,
-    color: '#ffffff',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 25,
-  },
-  authRequiredButton: {
-    backgroundColor: '#00FF88',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 12,
-    shadowColor: '#00FF88',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  authRequiredButtonText: {
-    color: '#000000',
-    fontSize: 18,
-    fontWeight: 'bold',
+    marginLeft: getResponsiveSize(6, 7, 8),
   },
 });
