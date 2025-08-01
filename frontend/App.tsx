@@ -665,7 +665,6 @@ export default function App() {
   const [showResultsModal, setShowResultsModal] = useState(false);
 
   useEffect(() => {
-    console.log('App initialized - Age verification will be shown first');
     setTimeout(() => {
       setShowAgeVerificationState(true);
       setAppInitialized(true);
