@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, Modal, TextInput, Alert, TouchableOpacity, Text, ScrollView, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,7 +35,7 @@ const isMediumMobile = SCREEN_WIDTH >= 360 && SCREEN_WIDTH < 414;
 const getResponsiveSize = (small: number, medium?: number, large?: number) => {
   const mediumSize = medium || small * 1.1;
   const largeSize = large || small * 1.2;
-  
+
   if (isSmallMobile) return small;
   if (isMediumMobile) return mediumSize;
   return largeSize;
@@ -406,6 +405,19 @@ export default function App() {
     }
   };
 
+  useEffect(() => {
+    // Show age verification modal on app start if not verified
+    if (!isAgeVerified) {
+      setShowAgeVerification(true);
+    }
+
+    // Show auth modal if not authenticated
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+    }
+  }, [isAuthenticated, isAgeVerified]);
+
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0a0a" />
@@ -415,6 +427,18 @@ export default function App() {
         onMenuItemPress={handleHeaderMenuItemPress}
         isAuthenticated={isAuthenticated}
         user={userData}
+        onLogout={() => {
+          // localStorage.clear(); // localStorage is not available in React Native
+          setIsAuthenticated(false);
+          setUserData({
+            name: 'Guest User',
+            phone: '',
+            email: '',
+            referralCode: '',
+            kycStatus: 'PENDING' as 'VERIFIED' | 'PENDING' | 'REJECTED'
+          });
+          setShowAuthModal(true);
+        }}
       />
 
       <View style={styles.content}>
