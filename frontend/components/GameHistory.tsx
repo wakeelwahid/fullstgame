@@ -15,7 +15,7 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
   const [filteredHistory, setFilteredHistory] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [realBetHistory, setRealBetHistory] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Disabled for static data testing
 
   // Game names mapping
   const gameNamesMap: Record<string, string> = {
@@ -64,11 +64,57 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
   };
 
   useEffect(() => {
-    fetchBetHistory();
+    // fetchBetHistory(); // Commented for static data testing
+    console.log('Using static test data for GameHistory');
   }, []);
 
-  // Use real data if available, otherwise use prop data, otherwise use empty array
-  const currentHistory = realBetHistory.length > 0 ? realBetHistory : (betHistory || []);
+  // Static test data for last 7 days
+  const staticTestData = [
+    // Today's data
+    { id: 1, game: 'Jaipur King', number: '45', amount: 100, type: 'single', status: 'win', winAmount: 950, timestamp: Date.now() - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (1 * 60 * 60 * 1000)).toISOString() },
+    { id: 2, game: 'Faridabad', number: '23', amount: 200, type: 'jodi', status: 'loss', winAmount: 0, timestamp: Date.now() - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (2 * 60 * 60 * 1000)).toISOString() },
+    { id: 3, game: 'Ghaziabad', number: '8', amount: 50, type: 'andar', status: 'win', winAmount: 95, timestamp: Date.now() - (3 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (3 * 60 * 60 * 1000)).toISOString() },
+    { id: 4, game: 'Gali', number: '91', amount: 300, type: 'bahar', status: 'pending', winAmount: 0, timestamp: Date.now() - (4 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (4 * 60 * 60 * 1000)).toISOString() },
+    
+    // Yesterday's data
+    { id: 5, game: 'Disawer', number: '5', amount: 150, type: 'single', status: 'win', winAmount: 1425, timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (1 * 24 * 60 * 60 * 1000)).toISOString() },
+    { id: 6, game: 'Diamond King', number: '34', amount: 500, type: 'jodi', status: 'loss', winAmount: 0, timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (1 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000)).toISOString() },
+    { id: 7, game: 'Jaipur King', number: '67', amount: 75, type: 'andar', status: 'win', winAmount: 142, timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (1 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
+    { id: 8, game: 'Faridabad', number: '12', amount: 250, type: 'bahar', status: 'loss', winAmount: 0, timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) - (3 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (1 * 24 * 60 * 60 * 1000) - (3 * 60 * 60 * 1000)).toISOString() },
+
+    // 2 days ago
+    { id: 9, game: 'Ghaziabad', number: '89', amount: 180, type: 'single', status: 'win', winAmount: 1710, timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (2 * 24 * 60 * 60 * 1000)).toISOString() },
+    { id: 10, game: 'Gali', number: '33', amount: 120, type: 'jodi', status: 'loss', winAmount: 0, timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (2 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000)).toISOString() },
+    { id: 11, game: 'Disawer', number: '76', amount: 80, type: 'andar', status: 'win', winAmount: 152, timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (2 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
+
+    // 3 days ago
+    { id: 12, game: 'Diamond King', number: '54', amount: 400, type: 'bahar', status: 'loss', winAmount: 0, timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (3 * 24 * 60 * 60 * 1000)).toISOString() },
+    { id: 13, game: 'Jaipur King', number: '21', amount: 60, type: 'single', status: 'win', winAmount: 570, timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (3 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000)).toISOString() },
+    { id: 14, game: 'Faridabad', number: '99', amount: 350, type: 'jodi', status: 'pending', winAmount: 0, timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (3 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
+
+    // 4 days ago
+    { id: 15, game: 'Ghaziabad', number: '17', amount: 90, type: 'andar', status: 'win', winAmount: 171, timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (4 * 24 * 60 * 60 * 1000)).toISOString() },
+    { id: 16, game: 'Gali', number: '66', amount: 200, type: 'bahar', status: 'loss', winAmount: 0, timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (4 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000)).toISOString() },
+    { id: 17, game: 'Disawer', number: '42', amount: 110, type: 'single', status: 'win', winAmount: 1045, timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (4 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
+
+    // 5 days ago
+    { id: 18, game: 'Diamond King', number: '03', amount: 300, type: 'jodi', status: 'loss', winAmount: 0, timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (5 * 24 * 60 * 60 * 1000)).toISOString() },
+    { id: 19, game: 'Jaipur King', number: '88', amount: 150, type: 'andar', status: 'win', winAmount: 285, timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (5 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000)).toISOString() },
+    { id: 20, game: 'Faridabad', number: '55', amount: 70, type: 'bahar', status: 'loss', winAmount: 0, timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (5 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
+
+    // 6 days ago
+    { id: 21, game: 'Ghaziabad', number: '29', amount: 85, type: 'single', status: 'win', winAmount: 807, timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (6 * 24 * 60 * 60 * 1000)).toISOString() },
+    { id: 22, game: 'Gali', number: '14', amount: 220, type: 'jodi', status: 'pending', winAmount: 0, timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (6 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000)).toISOString() },
+    { id: 23, game: 'Disawer', number: '73', amount: 95, type: 'andar', status: 'loss', winAmount: 0, timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (6 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
+
+    // 7 days ago
+    { id: 24, game: 'Diamond King', number: '61', amount: 180, type: 'bahar', status: 'win', winAmount: 342, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString() },
+    { id: 25, game: 'Jaipur King', number: '19', amount: 130, type: 'single', status: 'loss', winAmount: 0, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000)).toISOString() },
+    { id: 26, game: 'Faridabad', number: '07', amount: 250, type: 'jodi', status: 'win', winAmount: 2375, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
+  ];
+
+  // Use static data for testing, then real data if available, otherwise prop data
+  const currentHistory = staticTestData.length > 0 ? staticTestData : (realBetHistory.length > 0 ? realBetHistory : (betHistory || []));
 
   // Get last 7 days data only
   const getLast7DaysHistory = () => {
