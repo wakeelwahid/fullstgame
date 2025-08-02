@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +15,10 @@ export default function TermsConditions({ onBack }: TermsConditionsProps) {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <Ionicons name="arrow-back" size={24} color="#4A90E2" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>📋 Terms & Conditions</Text>
       </View>
 
@@ -91,13 +96,13 @@ export default function TermsConditions({ onBack }: TermsConditionsProps) {
           <Text style={styles.contactText}>
             कोई भी समस्या या सवाल के लिए हमारी customer support team से संपर्क करें।
           </Text>
-
+          
           <View style={styles.contactButtons}>
             <TouchableOpacity style={styles.whatsappButton}>
               <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
               <Text style={styles.contactButtonText}>WhatsApp Support</Text>
             </TouchableOpacity>
-
+            
             <TouchableOpacity style={styles.telegramButton}>
               <Ionicons name="paper-plane" size={20} color="#0088CC" />
               <Text style={styles.contactButtonText}>Telegram Support</Text>
@@ -123,17 +128,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0a0a',
   },
   header: {
-    backgroundColor: '#1a1a1a',
-    padding: 20,
-    borderBottomWidth: 2,
-    borderBottomColor: '#4A90E2',
+    flexDirection: 'row',
     alignItems: 'center',
+    padding: isSmallDevice ? 15 : 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+    backgroundColor: '#1a1a1a',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  backText: {
+    color: '#4A90E2',
+    fontSize: 16,
+    marginLeft: 5,
+    fontWeight: 'bold',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: isSmallDevice ? 18 : 20,
     fontWeight: 'bold',
     color: '#4A90E2',
-    textAlign: 'center',
   },
   content: {
     padding: isSmallDevice ? 15 : 20,
@@ -268,4 +284,3 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 });
-```The code has been modified to remove the back button from the header and update the header styles.
