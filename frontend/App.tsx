@@ -21,6 +21,11 @@ import ReferPage from './components/ReferPage';
 import ResultsModal from './components/ResultsModal';
 import AuthScreen from './components/AuthScreen';
 
+// Import additional components
+import TermsConditions from './components/TermsConditions';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import HelpSupport from './components/HelpSupport';
+
 // Import constants
 import { GAME_CARDS, FEATURES } from './constants/gameData';
 
@@ -43,19 +48,23 @@ const getResponsiveSize = (small: number, medium?: number, large?: number) => {
 
 export default function App() {
   // Authentication state
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showAgeVerification, setShowAgeVerification] = useState(false);
   const [isAgeVerified, setIsAgeVerified] = useState(false);
-
-  // User data
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState({
-    name: 'John Doe',
-    phone: '+91 98765 43210',
-    email: 'john@example.com',
-    referralCode: 'REF12345',
-    kycStatus: 'VERIFIED' as 'VERIFIED' | 'PENDING' | 'REJECTED'
+    name: 'Guest User',
+    phone: '',
+    email: '',
+    referralCode: '',
+    kycStatus: 'PENDING' as 'VERIFIED' | 'PENDING' | 'REJECTED'
   });
+
+  // New states for different pages
+  const [showTermsConditions, setShowTermsConditions] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showRefundPolicy, setShowRefundPolicy] = useState(false);
+  const [showHelpSupport, setShowHelpSupport] = useState(false);
 
   // Wallet state
   const [wallet, setWallet] = useState('₹1,750');
@@ -239,11 +248,17 @@ export default function App() {
     } else if (key === 'refer') {
       setActiveTab('refer');
     } else if (key === 'help') {
-      setActiveTab('help');
+      setShowHelpSupport(true);
     } else if (key === 'logout') {
       setIsAuthenticated(false);
       setActiveTab('home');
       Alert.alert('✅ Logout Successful', 'आप successfully logout हो गए हैं।');
+    } else if (key === 'terms') {
+      setShowTermsConditions(true);
+    } else if (key === 'privacy') {
+      setShowPrivacyPolicy(true);
+    } else if (key === 'refund') {
+      setShowRefundPolicy(true);
     }
   };
 
@@ -540,6 +555,46 @@ export default function App() {
         visible={showResultsModal}
         onClose={() => setShowResultsModal(false)}
       />
+
+      {/* Terms & Conditions Modal */}
+      <Modal
+        visible={showTermsConditions}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setShowTermsConditions(false)}
+      >
+        <TermsConditions onBack={() => setShowTermsConditions(false)} />
+      </Modal>
+
+      {/* Privacy Policy Modal */}
+      <Modal
+        visible={showPrivacyPolicy}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setShowPrivacyPolicy(false)}
+      >
+        <PrivacyPolicy onBack={() => setShowPrivacyPolicy(false)} />
+      </Modal>
+
+      {/* Refund Policy Modal */}
+      <Modal
+        visible={showRefundPolicy}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setShowRefundPolicy(false)}
+      >
+        <RefundPolicy onBack={() => setShowRefundPolicy(false)} />
+      </Modal>
+
+      {/* Help & Support Modal */}
+      <Modal
+        visible={showHelpSupport}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setShowHelpSupport(false)}
+      >
+        <HelpSupport onBack={() => setShowHelpSupport(false)} />
+      </Modal>
     </SafeAreaView>
   );
 }

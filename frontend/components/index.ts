@@ -19,3 +19,7 @@ export { default as GameRulesModal } from './GameRulesModal';
 export { default as AuthScreen } from './AuthScreen';
 export { default as ResultsModal } from './ResultsModal';
 export { default as SecureWrapper } from './SecureWrapper';
+export { default as AgeVerificationModal } from './AgeVerificationModal';
+export { default as TermsConditions } from './TermsConditions';
+export { default as PrivacyPolicy } from './PrivacyPolicy';
+export { default as HelpSupport } from './HelpSupport';
