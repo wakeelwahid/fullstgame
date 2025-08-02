@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,10 +26,6 @@ export default function HelpSupport({ onBack }: HelpSupportProps) {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <Ionicons name="arrow-back" size={24} color="#4A90E2" />
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>🆘 Help & Support</Text>
       </View>
 
@@ -42,7 +37,7 @@ export default function HelpSupport({ onBack }: HelpSupportProps) {
         {/* Quick Contact */}
         <View style={styles.quickContactContainer}>
           <Text style={styles.quickContactTitle}>📞 तुरंत सहायता पाएं</Text>
-          
+
           <TouchableOpacity style={styles.whatsappButton} onPress={handleWhatsAppPress}>
             <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
             <View style={styles.contactInfo}>
@@ -77,7 +72,7 @@ export default function HelpSupport({ onBack }: HelpSupportProps) {
         {/* FAQ Section */}
         <View style={styles.faqContainer}>
           <Text style={styles.faqTitle}>❓ अक्सर पूछे जाने वाले सवाल</Text>
-          
+
           <View style={styles.faqItem}>
             <Text style={styles.faqQuestion}>🎮 गेम कैसे खेलें?</Text>
             <Text style={styles.faqAnswer}>
@@ -127,7 +122,7 @@ export default function HelpSupport({ onBack }: HelpSupportProps) {
         {/* Common Issues */}
         <View style={styles.issuesContainer}>
           <Text style={styles.issuesTitle}>🔧 सामान्य समस्याएं और समाधान</Text>
-          
+
           <View style={styles.issueItem}>
             <Text style={styles.issueTitle}>💳 Payment Failed</Text>
             <Text style={styles.issueText}>• Internet connection check करें{'\n'}• Bank balance verify करें{'\n'}• Support team से contact करें</Text>
@@ -187,28 +182,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0a0a',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: isSmallDevice ? 15 : 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
     backgroundColor: '#1a1a1a',
-  },
-  backButton: {
-    flexDirection: 'row',
+    padding: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: '#4A90E2',
     alignItems: 'center',
-    marginRight: 15,
-  },
-  backText: {
-    color: '#4A90E2',
-    fontSize: 16,
-    marginLeft: 5,
-    fontWeight: 'bold',
   },
   headerTitle: {
-    fontSize: isSmallDevice ? 18 : 20,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#4A90E2',
+    textAlign: 'center',
   },
   content: {
     padding: isSmallDevice ? 15 : 20,

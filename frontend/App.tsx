@@ -20,6 +20,7 @@ import KYCPage from './components/KYCPage';
 import ReferPage from './components/ReferPage';
 import ResultsModal from './components/ResultsModal';
 import AuthScreen from './components/AuthScreen';
+import GameHistory from './components/GameHistory';
 
 // Import additional components
 import TermsConditions from './components/TermsConditions';
@@ -382,6 +383,8 @@ export default function App() {
         return <MyBet placedBets={placedBets} />;
       case 'transactions':
         return <Transaction />;
+      case 'game-history':
+        return <GameHistory betHistory={betHistory} />;
       case 'refer':
         return <ReferPage userData={userData} />;
       case 'profile':
@@ -564,7 +567,7 @@ export default function App() {
         transparent={false}
         onRequestClose={() => setShowTermsConditions(false)}
       >
-        <TermsConditions onBack={() => setShowTermsConditions(false)} />
+        <TermsConditions />
       </Modal>
 
       {/* Privacy Policy Modal */}
@@ -574,7 +577,7 @@ export default function App() {
         transparent={false}
         onRequestClose={() => setShowPrivacyPolicy(false)}
       >
-        <PrivacyPolicy onBack={() => setShowPrivacyPolicy(false)} />
+        <PrivacyPolicy />
       </Modal>
 
       {/* Refund Policy Modal */}
@@ -584,7 +587,7 @@ export default function App() {
         transparent={false}
         onRequestClose={() => setShowRefundPolicy(false)}
       >
-        <RefundPolicy onBack={() => setShowRefundPolicy(false)} />
+        <RefundPolicy />
       </Modal>
 
       {/* Help & Support Modal */}
@@ -594,7 +597,7 @@ export default function App() {
         transparent={false}
         onRequestClose={() => setShowHelpSupport(false)}
       >
-        <HelpSupport onBack={() => setShowHelpSupport(false)} />
+        <HelpSupport />
       </Modal>
     </SafeAreaView>
   );
