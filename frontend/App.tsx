@@ -33,13 +33,10 @@ const isSmallMobile = SCREEN_WIDTH < 360;
 const isMediumMobile = SCREEN_WIDTH >= 360 && SCREEN_WIDTH < 414;
 
 // Dynamic sizing for mobile screens
-const getResponsiveSize = (small: number, medium?: number, large?: number) => {
-  const mediumSize = medium || small * 1.1;
-  const largeSize = large || small * 1.2;
-  
+const getResponsiveSize = (small: number, medium: number = small * 1.1, large: number = small * 1.2) => {
   if (isSmallMobile) return small;
-  if (isMediumMobile) return mediumSize;
-  return largeSize;
+  if (isMediumMobile) return medium;
+  return large;
 };
 
 export default function App() {
