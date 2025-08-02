@@ -156,7 +156,10 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
     borderWidth: 2,
-    boxShadow: '0px 4px 8px rgba(74, 144, 226, 0.3)',
+    shadowColor: '#4A90E2',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
     elevation: 8,
   },
   gameHeader: {

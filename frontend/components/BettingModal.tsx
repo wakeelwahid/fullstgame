@@ -875,7 +875,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)',
+    backgroundColor: '#1a1a1a',
   },
   summaryTitle: {
     color: '#FFD700',
@@ -985,7 +985,11 @@ const styles = StyleSheet.create({
   selectedNumberButton: {
     borderWidth: 3,
     borderColor: '#00ff88',
-    boxShadow: '0 0 25px rgba(0, 255, 136, 0.8)',
+    elevation: 12,
+    shadowColor: '#00ff88',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12.5,
   },
   particleEffect: {
     position: 'absolute',
@@ -1089,12 +1093,20 @@ const styles = StyleSheet.create({
   selectedAndarButton: {
     borderWidth: 3,
     borderColor: '#00ff88',
-    boxShadow: '0 0 25px rgba(0, 255, 136, 0.8)',
+    elevation: 12,
+    shadowColor: '#00ff88',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12.5,
   },
   selectedBaharButton: {
     borderWidth: 3,
     borderColor: '#ff6b6b',
-    boxShadow: '0 0 25px rgba(255, 107, 107, 0.8)',
+    elevation: 12,
+    shadowColor: '#ff6b6b',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12.5,
   },
   animatedBackground: {
     position: 'absolute',
@@ -1167,7 +1179,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, #00ff88 0%, #00cc6a 50%, #00ff88 100%)',
+    backgroundColor: '#00ff88',
   },
   buttonGlow: {
     position: 'absolute',
@@ -1210,7 +1222,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)',
+    backgroundColor: '#1a1a1a',
   },
   popupHeader: {
     flexDirection: 'row',
@@ -1274,7 +1286,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, #333333 0%, #4d4d4d 50%, #333333 100%)',
+    backgroundColor: '#333333',
   },
   quickAmountText: {
     color: '#FFD700',
@@ -1314,7 +1326,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, #FF6B6B 0%, #FF5252 50%, #FF6B6B 100%)',
+    backgroundColor: '#FF6B6B',
   },
   confirmButtonText: {
     color: '#FFFFFF',
