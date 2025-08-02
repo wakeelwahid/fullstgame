@@ -118,3 +118,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+const menuItems = [
+    { key: 'home', title: 'Home', icon: 'home' as const },
+    { key: 'profile', title: 'Profile', icon: 'person' as const },
+    { key: 'transactions', title: 'Transactions', icon: 'receipt' as const },
+    { key: 'game-history', title: 'History', icon: 'time' as const },
+    { key: 'refer', title: 'Refer & Earn', icon: 'people' as const },
+    { key: 'my-bets', title: 'My Bets', icon: 'trophy' as const },
+  ];

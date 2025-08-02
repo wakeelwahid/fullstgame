@@ -10,11 +10,11 @@ interface ProfileProps {
     referralCode: string;
     kycStatus: 'VERIFIED' | 'PENDING' | 'REJECTED';
   };
-  onUpdateProfile: (data: any) => void;
-  onCompleteKYC: () => void;
+  onUpdateProfile: (updatedData: any) => void;
+  onNavigate?: (screen: string) => void;
 }
 
-export default function Profile({ userData, onUpdateProfile, onCompleteKYC }: ProfileProps) {
+export default function Profile({ userData, onUpdateProfile, onNavigate }: ProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(userData);
   const [showKYCForm, setShowKYCForm] = useState(false);
@@ -95,6 +95,12 @@ export default function Profile({ userData, onUpdateProfile, onCompleteKYC }: Pr
         },
       ]
     );
+  };
+
+    const handleMenuPress = (item: string) => {
+    if (onNavigate) {
+      onNavigate(item);
+    }
   };
 
   return (
@@ -213,6 +219,17 @@ export default function Profile({ userData, onUpdateProfile, onCompleteKYC }: Pr
             <Text style={styles.completeKycButtonText}>Complete KYC</Text>
           </TouchableOpacity>
         )}
+           <TouchableOpacity onPress={() => handleMenuPress('kyc')} style={styles.listItem}>
+        <Text style={styles.listItemText}>KYC</Text>
+      </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleMenuPress('terms')} style={styles.listItem}>
+        <Text style={styles.listItemText}>Terms & Conditions</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => handleMenuPress('privacy')} style={styles.listItem}>
+        <Text style={styles.listItemText}>Privacy Policy</Text>
+      </TouchableOpacity>
+    
       </View>
 
       {/* KYC Verification Modal */}

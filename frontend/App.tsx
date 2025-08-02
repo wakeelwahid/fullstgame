@@ -556,46 +556,6 @@ export default function App() {
         visible={showResultsModal}
         onClose={() => setShowResultsModal(false)}
       />
-
-      {/* Terms & Conditions Modal */}
-      <Modal
-        visible={showTermsConditions}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setShowTermsConditions(false)}
-      >
-        <TermsConditions onBack={() => setShowTermsConditions(false)} />
-      </Modal>
-
-      {/* Privacy Policy Modal */}
-      <Modal
-        visible={showPrivacyPolicy}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setShowPrivacyPolicy(false)}
-      >
-        <PrivacyPolicy onBack={() => setShowPrivacyPolicy(false)} />
-      </Modal>
-
-      {/* Refund Policy Modal */}
-      <Modal
-        visible={showRefundPolicy}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setShowRefundPolicy(false)}
-      >
-        <RefundPolicy onBack={() => setShowRefundPolicy(false)} />
-      </Modal>
-
-      {/* Help & Support Modal */}
-      <Modal
-        visible={showHelpSupport}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setShowHelpSupport(false)}
-      >
-        <HelpSupport onBack={() => setShowHelpSupport(false)} />
-      </Modal>
     </SafeAreaView>
   );
 }
