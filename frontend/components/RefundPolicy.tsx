@@ -16,10 +16,6 @@ export default function RefundPolicy({ onBack }: RefundPolicyProps) {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <Ionicons name="arrow-back" size={24} color="#4A90E2" />
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>💳 Refund Policy</Text>
       </View>
 
@@ -143,8 +139,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0a0a',
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     padding: isSmallDevice ? 15 : 20,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
