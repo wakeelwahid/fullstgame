@@ -1116,9 +1116,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
     zIndex: 1,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   selectedAndarText: {
     color: '#000000',

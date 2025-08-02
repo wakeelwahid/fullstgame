@@ -117,49 +117,4 @@ const styles = StyleSheet.create({
     color: '#4A90E2',
     fontWeight: 'bold',
   },
-
-});
-```/**
- * This component defines the bottom navigation menu for the app.
- */
-import { Dimensions } from 'react-native';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const isSmallDevice = SCREEN_WIDTH < 375;
-
-const styles = StyleSheet.create({
-  bottomTabBar: {
-    flexDirection: 'row',
-    backgroundColor: '#1a1a1a',
-    paddingVertical: isSmallDevice ? 4 : 6,
-    paddingHorizontal: isSmallDevice ? 2 : 5,
-    borderTopWidth: 1,
-    borderTopColor: '#333',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    height: isSmallDevice ? 50 : 60,
-    position: 'relative',
-    boxShadow: '0px -2px 3px rgba(0, 0, 0, 0.1)',
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: isSmallDevice ? 4 : 6,
-    paddingHorizontal: isSmallDevice ? 2 : 4,
-  },
-  activeTabItem: {
-    backgroundColor: 'transparent',
-  },
-  tabText: {
-    fontSize: isSmallDevice ? 8 : 10,
-    color: '#999',
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  activeTabText: {
-    color: '#4A90E2',
-    fontWeight: 'bold',
-  },
-
 });
