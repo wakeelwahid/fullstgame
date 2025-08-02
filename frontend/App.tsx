@@ -25,6 +25,7 @@ import AuthScreen from './components/AuthScreen';
 import TermsConditions from './components/TermsConditions';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import HelpSupport from './components/HelpSupport';
+import RefundPolicy from './components/RefundPolicy';
 
 // Import constants
 import { GAME_CARDS, FEATURES } from './constants/gameData';
