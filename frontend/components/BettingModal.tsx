@@ -247,8 +247,8 @@ export default function BettingModal({
   const renderAndarNumbers = () => {
     const numbers = [];
     for (let i = 0; i <= 9; i++) {
-      const numberKey = `Andar ${i}`;
-      const bet = betList.find(b => b.number === numberKey && b.type === 'andar');
+      const numberKey = i;
+      const bet = betList.find(b => b.number === i && b.type === 'andar');
       const isSelected = !!bet;
       numbers.push(
         <Animated.View
@@ -269,7 +269,7 @@ export default function BettingModal({
               if (isSelected) {
                 onRemoveBet(bet.id);
               } else {
-                setSelectedNumber(numberKey);
+                setSelectedNumber(i);
                 setSelectedType('andar');
                 setShowAmountPopup(true);
               }
@@ -314,8 +314,8 @@ export default function BettingModal({
   const renderBaharNumbers = () => {
     const numbers = [];
     for (let i = 0; i <= 9; i++) {
-      const numberKey = `Bahar ${i}`;
-      const bet = betList.find(b => b.number === numberKey && b.type === 'bahar');
+      const numberKey = i;
+      const bet = betList.find(b => b.number === i && b.type === 'bahar');
       const isSelected = !!bet;
       numbers.push(
         <Animated.View
@@ -336,7 +336,7 @@ export default function BettingModal({
               if (isSelected) {
                 onRemoveBet(bet.id);
               } else {
-                setSelectedNumber(numberKey);
+                setSelectedNumber(i);
                 setSelectedType('bahar');
                 setShowAmountPopup(true);
               }
@@ -499,6 +499,8 @@ export default function BettingModal({
                         const chipStyle = bet.type === 'andar' ? styles.andarChip : 
                                         bet.type === 'bahar' ? styles.baharChip : 
                                         styles.selectedChip;
+                        const displayText = bet.type === 'andar' ? `A${bet.number}` :
+                                          bet.type === 'bahar' ? `B${bet.number}` : bet.number;
                         return (
                           <Animated.View 
                             key={index} 
@@ -514,7 +516,7 @@ export default function BettingModal({
                               }
                             ]}
                           >
-                            <Text style={styles.selectedChipText}>{bet.number}</Text>
+                            <Text style={styles.selectedChipText}>{displayText}</Text>
                             <Text style={styles.selectedChipAmount}>₹{bet.amount}</Text>
                           </Animated.View>
                         );
@@ -666,7 +668,8 @@ export default function BettingModal({
             <View style={styles.popupGradient} />
             <View style={styles.popupHeader}>
               <Text style={styles.popupTitle}>
-                💰 Bet Amount - {selectedNumber}
+                💰 Bet Amount - {selectedType === 'andar' ? `Andar ${selectedNumber}` : 
+                                selectedType === 'bahar' ? `Bahar ${selectedNumber}` : selectedNumber}
               </Text>
               <TouchableOpacity 
                 onPress={() => setShowAmountPopup(false)} 

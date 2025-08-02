@@ -79,6 +79,8 @@ export default function App() {
 
   // Betting state
   const [betList, setBetList] = useState([]);
+  const [nextBetId, setNextBetId] = useState(1);
+  const [currentBetType, setCurrentBetType] = useState('numbers');
   const [lastBetDetails, setLastBetDetails] = useState(null);
   const [placedBets, setPlacedBets] = useState([]);
   const [betHistory, setBetHistory] = useState([
@@ -221,7 +223,7 @@ export default function App() {
     }, 3000);
   };
 
-  const removeBet = (betId: number) => {
+  const handleRemoveBet = (betId: number) => {
     setBetList(betList.filter(b => b.id !== betId));
   };
 
@@ -455,16 +457,19 @@ export default function App() {
       />
 
       <BettingModal
-        visible={showBettingModal}
-        selectedGame={selectedGame}
-        currentBetType="numbers"
-        betList={betList}
-        onClose={() => setShowBettingModal(false)}
-        onBetTypeChange={() => {}}
-        onNumberSelect={handleNumberSelect}
-        onRemoveBet={removeBet}
-        onPlaceBets={handlePlaceBets}
-      />
+          visible={showBettingModal}
+          selectedGame={selectedGame}
+          currentBetType={currentBetType}
+          betList={betList}
+          onClose={() => {
+            setShowBettingModal(false);
+            setCurrentBetType('numbers');
+          }}
+          onBetTypeChange={setCurrentBetType}
+          onNumberSelect={handleNumberSelect}
+          onRemoveBet={handleRemoveBet}
+          onPlaceBets={handlePlaceBets}
+        />
 
       <AuthScreen 
         visible={showAuthModal}
