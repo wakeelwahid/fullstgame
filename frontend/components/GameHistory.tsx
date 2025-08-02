@@ -7,9 +7,9 @@ interface GameHistoryProps {
   betHistory?: any[];
 }
 
-// Enhanced mock game history data for last 7 days
+// Enhanced mock game history data for last 30 days
 const mockGameHistory = [
-  // Today - Day 1
+  // Today
   {
     id: '1',
     game: 'Jaipur King',
@@ -29,19 +29,9 @@ const mockGameHistory = [
     status: 'loss',
     timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000), // Today
   },
+  // Yesterday
   {
     id: '3',
-    game: 'Faridabad',
-    number: '67',
-    amount: 75,
-    type: 'andar',
-    status: 'pending',
-    timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000), // Today
-  },
-  
-  // Yesterday - Day 2
-  {
-    id: '4',
     game: 'Jaipur King',
     number: '8',
     amount: 200,
@@ -51,7 +41,7 @@ const mockGameHistory = [
     timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
   },
   {
-    id: '5',
+    id: '4',
     game: 'Mumbai King',
     number: '91',
     amount: 150,
@@ -59,19 +49,9 @@ const mockGameHistory = [
     status: 'pending',
     timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
   },
+  // 2 days ago
   {
-    id: '6',
-    game: 'Ghaziabad',
-    number: '34',
-    amount: 120,
-    type: 'andar',
-    status: 'loss',
-    timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
-  },
-  
-  // Day 3 - 2 days ago
-  {
-    id: '7',
+    id: '5',
     game: 'Delhi Bazaar',
     number: '5',
     amount: 75,
@@ -80,7 +60,7 @@ const mockGameHistory = [
     timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
   },
   {
-    id: '8',
+    id: '6',
     game: 'Jaipur King',
     number: '34',
     amount: 300,
@@ -89,20 +69,9 @@ const mockGameHistory = [
     winAmount: 540,
     timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
   },
+  // 3 days ago
   {
-    id: '9',
-    game: 'Disawar',
-    number: '88',
-    amount: 90,
-    type: 'andar',
-    status: 'win',
-    winAmount: 162,
-    timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
-  },
-  
-  // Day 4 - 3 days ago
-  {
-    id: '10',
+    id: '7',
     game: 'Mumbai King',
     number: '7',
     amount: 100,
@@ -111,7 +80,7 @@ const mockGameHistory = [
     timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000), // 3 days ago
   },
   {
-    id: '11',
+    id: '8',
     game: 'Ghaziabad',
     number: '89',
     amount: 250,
@@ -120,19 +89,9 @@ const mockGameHistory = [
     winAmount: 450,
     timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000), // 3 days ago
   },
+  // 4 days ago
   {
-    id: '12',
-    game: 'Gali',
-    number: '12',
-    amount: 60,
-    type: 'andar',
-    status: 'loss',
-    timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000), // 3 days ago
-  },
-  
-  // Day 5 - 4 days ago
-  {
-    id: '13',
+    id: '9',
     game: 'Faridabad',
     number: '12',
     amount: 80,
@@ -140,30 +99,9 @@ const mockGameHistory = [
     status: 'loss',
     timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000), // 4 days ago
   },
+  // 5 days ago
   {
-    id: '14',
-    game: 'Diamond King',
-    number: '77',
-    amount: 180,
-    type: 'bahar',
-    status: 'win',
-    winAmount: 324,
-    timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000), // 4 days ago
-  },
-  {
-    id: '15',
-    game: 'Jaipur King',
-    number: '45',
-    amount: 110,
-    type: 'andar',
-    status: 'win',
-    winAmount: 198,
-    timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000), // 4 days ago
-  },
-  
-  // Day 6 - 5 days ago
-  {
-    id: '16',
+    id: '10',
     game: 'Disawar',
     number: '67',
     amount: 120,
@@ -172,28 +110,9 @@ const mockGameHistory = [
     winAmount: 216,
     timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000), // 5 days ago
   },
+  // 6 days ago
   {
-    id: '17',
-    game: 'Delhi Bazaar',
-    number: '23',
-    amount: 95,
-    type: 'andar',
-    status: 'loss',
-    timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000), // 5 days ago
-  },
-  {
-    id: '18',
-    game: 'Mumbai King',
-    number: '56',
-    amount: 140,
-    type: 'bahar',
-    status: 'pending',
-    timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000), // 5 days ago
-  },
-  
-  // Day 7 - 6 days ago
-  {
-    id: '19',
+    id: '11',
     game: 'Gali',
     number: '33',
     amount: 90,
@@ -201,56 +120,48 @@ const mockGameHistory = [
     status: 'loss',
     timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000), // 6 days ago
   },
+  // 7 days ago
   {
-    id: '20',
-    game: 'Ghaziabad',
-    number: '89',
-    amount: 200,
-    type: 'bahar',
-    status: 'win',
-    winAmount: 360,
-    timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000), // 6 days ago
-  },
-  {
-    id: '21',
+    id: '12',
     game: 'Diamond King',
     number: '55',
     amount: 180,
     type: 'bahar',
     status: 'win',
     winAmount: 324,
-    timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000), // 6 days ago
-  },
-  
-  // Day 8 - 7 days ago (Last day of 7-day period)
-  {
-    id: '22',
-    game: 'Faridabad',
-    number: '78',
-    amount: 160,
-    type: 'andar',
-    status: 'win',
-    winAmount: 288,
     timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000), // 7 days ago
   },
+  // 15 days ago
   {
-    id: '23',
+    id: '13',
     game: 'Jaipur King',
     number: '21',
-    amount: 85,
-    type: 'bahar',
+    amount: 60,
+    type: 'andar',
     status: 'loss',
-    timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000), // 7 days ago
+    timestamp: Date.now() - (15 * 24 * 60 * 60 * 1000), // 15 days ago
   },
+  // 20 days ago
   {
-    id: '24',
-    game: 'Disawar',
-    number: '44',
-    amount: 130,
+    id: '14',
+    game: 'Delhi Bazaar',
+    number: '77',
+    amount: 140,
+    type: 'bahar',
+    status: 'win',
+    winAmount: 252,
+    timestamp: Date.now() - (20 * 24 * 60 * 60 * 1000), // 20 days ago
+  },
+  // 25 days ago
+  {
+    id: '15',
+    game: 'Mumbai King',
+    number: '99',
+    amount: 200,
     type: 'andar',
     status: 'win',
-    winAmount: 234,
-    timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000), // 7 days ago
+    winAmount: 360,
+    timestamp: Date.now() - (25 * 24 * 60 * 60 * 1000), // 25 days ago
   }
 ];
 
