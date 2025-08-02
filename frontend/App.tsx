@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, StatusBar, Modal, TextInput, Alert, TouchableOpacity, Text, ScrollView, Dimensions } from 'react-native';
+import { View, StyleSheet, SafeAreaView, StatusBar, TextInput, Alert, TouchableOpacity, Text, ScrollView, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Import components
@@ -61,11 +61,7 @@ export default function App() {
     kycStatus: 'PENDING' as 'VERIFIED' | 'PENDING' | 'REJECTED'
   });
 
-  // New states for different pages
-  const [showTermsConditions, setShowTermsConditions] = useState(false);
-  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-  const [showRefundPolicy, setShowRefundPolicy] = useState(false);
-  const [showHelpSupport, setShowHelpSupport] = useState(false);
+  // Remove modal states as these will now be tabs
 
   // Wallet state
   const [wallet, setWallet] = useState('₹1,750');
@@ -249,17 +245,17 @@ export default function App() {
     } else if (key === 'refer') {
       setActiveTab('refer');
     } else if (key === 'help') {
-      setShowHelpSupport(true);
+      setActiveTab('help');
     } else if (key === 'logout') {
       setIsAuthenticated(false);
       setActiveTab('home');
       Alert.alert('✅ Logout Successful', 'आप successfully logout हो गए हैं।');
     } else if (key === 'terms') {
-      setShowTermsConditions(true);
+      setActiveTab('terms');
     } else if (key === 'privacy') {
-      setShowPrivacyPolicy(true);
+      setActiveTab('privacy');
     } else if (key === 'refund') {
-      setShowRefundPolicy(true);
+      setActiveTab('refund');
     }
   };
 
@@ -384,6 +380,14 @@ export default function App() {
         return <Transaction />;
       case 'refer':
         return <ReferPage userData={userData} />;
+      case 'terms':
+        return <TermsConditions onBack={() => setActiveTab('home')} />;
+      case 'privacy':
+        return <PrivacyPolicy onBack={() => setActiveTab('home')} />;
+      case 'refund':
+        return <RefundPolicy onBack={() => setActiveTab('home')} />;
+      case 'help':
+        return <HelpSupport onBack={() => setActiveTab('home')} />;
       case 'profile':
         return (
           <Profile
@@ -392,27 +396,7 @@ export default function App() {
             onCompleteKYC={() => setShowKYCPage(true)}
           />
         );
-      case 'help':
-        return (
-          <View style={styles.tabContent}>
-            <Text style={styles.tabTitle}>🆘 Help & Support</Text>
-            <ScrollView style={styles.helpContainer} showsVerticalScrollIndicator={false}>
-              <Text style={styles.helpWelcome}>हमारी support team 24x7 आपकी सेवा में है!</Text>
-
-              <View style={styles.contactSection}>
-                <Text style={styles.contactTitle}>📱 Contact Us</Text>
-
-                <TouchableOpacity style={styles.contactButton}>
-                  <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
-                  <View style={styles.contactInfo}>
-                    <Text style={styles.contactMethod}>WhatsApp Support</Text>
-                    <Text style={styles.contactDetails}>+91 98765 43210</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        );
+      
       default:
         return (
           <View style={styles.tabContent}>
@@ -557,45 +541,7 @@ export default function App() {
         onClose={() => setShowResultsModal(false)}
       />
 
-      {/* Terms & Conditions Modal */}
-      <Modal
-        visible={showTermsConditions}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setShowTermsConditions(false)}
-      >
-        <TermsConditions onBack={() => setShowTermsConditions(false)} />
-      </Modal>
-
-      {/* Privacy Policy Modal */}
-      <Modal
-        visible={showPrivacyPolicy}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setShowPrivacyPolicy(false)}
-      >
-        <PrivacyPolicy onBack={() => setShowPrivacyPolicy(false)} />
-      </Modal>
-
-      {/* Refund Policy Modal */}
-      <Modal
-        visible={showRefundPolicy}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setShowRefundPolicy(false)}
-      >
-        <RefundPolicy onBack={() => setShowRefundPolicy(false)} />
-      </Modal>
-
-      {/* Help & Support Modal */}
-      <Modal
-        visible={showHelpSupport}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setShowHelpSupport(false)}
-      >
-        <HelpSupport onBack={() => setShowHelpSupport(false)} />
-      </Modal>
+      
     </SafeAreaView>
   );
 }
@@ -733,48 +679,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
-  helpContainer: {
-    width: '100%',
-    paddingHorizontal: getResponsiveSize(10),
-  },
-  helpWelcome: {
-    color: '#00FF88',
-    fontSize: getResponsiveSize(16),
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: getResponsiveSize(20),
-  },
-  contactSection: {
-    marginBottom: getResponsiveSize(25),
-  },
-  contactTitle: {
-    color: '#FFD700',
-    fontSize: getResponsiveSize(16),
-    fontWeight: 'bold',
-    marginBottom: getResponsiveSize(15),
-  },
-  contactButton: {
-    flexDirection: 'row',
-    backgroundColor: '#1a1a1a',
-    padding: getResponsiveSize(15),
-    borderRadius: getResponsiveSize(12),
-    marginBottom: getResponsiveSize(12),
-    borderWidth: 1,
-    borderColor: '#333',
-    alignItems: 'center',
-  },
-  contactInfo: {
-    marginLeft: getResponsiveSize(15),
-    flex: 1,
-  },
-  contactMethod: {
-    color: '#fff',
-    fontSize: getResponsiveSize(16),
-    fontWeight: 'bold',
-    marginBottom: 2,
-  },
-  contactDetails: {
-    color: '#4A90E2',
-    fontSize: getResponsiveSize(14),
-  },
+  
 });
