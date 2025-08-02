@@ -1,73 +1,79 @@
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import { betService } from '../services/betService';
 
 interface GameHistoryProps {
   betHistory?: any[];
 }
 
-// Enhanced mock game history data for last 7 days - all 6 games
-const mockGameHistory = [
-  // Today's bets
-  { id: '1', game: 'Jaipur King', number: '45', amount: 100, type: 'number', status: 'win', winAmount: 9000, timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000) },
-  { id: '2', game: 'Faridabad', number: '7', amount: 50, type: 'andar', status: 'win', winAmount: 450, timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000) },
-  { id: '3', game: 'Gali', number: '3', amount: 75, type: 'bahar', status: 'loss', timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000) },
-  { id: '4', game: 'Diamond King', number: '89', amount: 200, type: 'number', status: 'pending', timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000) },
-
-  // Yesterday's bets
-  { id: '5', game: 'Disawer', number: '2', amount: 120, type: 'andar', status: 'win', winAmount: 1080, timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) },
-  { id: '6', game: 'Ghaziabad', number: '8', amount: 80, type: 'bahar', status: 'loss', timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) },
-  { id: '7', game: 'Jaipur King', number: '34', amount: 150, type: 'number', status: 'win', winAmount: 13500, timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) },
-  { id: '8', game: 'Faridabad', number: '6', amount: 90, type: 'andar', status: 'loss', timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) },
-
-  // 2 days ago
-  { id: '9', game: 'Gali', number: '91', amount: 110, type: 'number', status: 'win', winAmount: 9900, timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) },
-  { id: '10', game: 'Diamond King', number: '4', amount: 60, type: 'bahar', status: 'loss', timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) },
-  { id: '11', game: 'Disawer', number: '77', amount: 180, type: 'number', status: 'win', winAmount: 16200, timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) },
-  { id: '12', game: 'Ghaziabad', number: '9', amount: 70, type: 'andar', status: 'win', winAmount: 630, timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) },
-
-  // 3 days ago
-  { id: '13', game: 'Jaipur King', number: '1', amount: 85, type: 'bahar', status: 'loss', timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) },
-  { id: '14', game: 'Faridabad', number: '56', amount: 130, type: 'number', status: 'win', winAmount: 11700, timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) },
-  { id: '15', game: 'Gali', number: '0', amount: 95, type: 'andar', status: 'win', winAmount: 855, timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) },
-  { id: '16', game: 'Diamond King', number: '23', amount: 160, type: 'number', status: 'loss', timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) },
-
-  // 4 days ago
-  { id: '17', game: 'Disawer', number: '5', amount: 75, type: 'bahar', status: 'win', winAmount: 675, timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) },
-  { id: '18', game: 'Ghaziabad', number: '88', amount: 220, type: 'number', status: 'win', winAmount: 19800, timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) },
-  { id: '19', game: 'Jaipur King', number: '7', amount: 55, type: 'andar', status: 'loss', timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) },
-  { id: '20', game: 'Faridabad', number: '3', amount: 100, type: 'bahar', status: 'win', winAmount: 900, timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) },
-
-  // 5 days ago
-  { id: '21', game: 'Gali', number: '45', amount: 140, type: 'number', status: 'loss', timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) },
-  { id: '22', game: 'Diamond King', number: '8', amount: 65, type: 'andar', status: 'win', winAmount: 585, timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) },
-  { id: '23', game: 'Disawer', number: '2', amount: 90, type: 'bahar', status: 'loss', timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) },
-  { id: '24', game: 'Ghaziabad', number: '67', amount: 175, type: 'number', status: 'win', winAmount: 15750, timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) },
-
-  // 6 days ago
-  { id: '25', game: 'Jaipur King', number: '9', amount: 80, type: 'bahar', status: 'win', winAmount: 720, timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) },
-  { id: '26', game: 'Faridabad', number: '12', amount: 115, type: 'number', status: 'loss', timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) },
-  { id: '27', game: 'Gali', number: '4', amount: 70, type: 'andar', status: 'win', winAmount: 630, timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) },
-  { id: '28', game: 'Diamond King', number: '6', amount: 125, type: 'bahar', status: 'loss', timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) },
-
-  // 7 days ago
-  { id: '29', game: 'Disawer', number: '99', amount: 190, type: 'number', status: 'win', winAmount: 17100, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) },
-  { id: '30', game: 'Ghaziabad', number: '1', amount: 85, type: 'andar', status: 'loss', timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) },
-  { id: '31', game: 'Jaipur King', number: '78', amount: 150, type: 'number', status: 'win', winAmount: 13500, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) },
-  { id: '32', game: 'Faridabad', number: '5', amount: 95, type: 'bahar', status: 'win', winAmount: 855, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) }
-];
-
-export default function GameHistory({ betHistory = mockGameHistory }: GameHistoryProps) {
+const GameHistory = ({ betHistory }: GameHistoryProps) => {
   const [selectedGame, setSelectedGame] = useState<string>('All Games');
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('Last 7 Days');
   const [filteredHistory, setFilteredHistory] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [realBetHistory, setRealBetHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Game names mapping
+  const gameNamesMap: Record<string, string> = {
+    'JAIPUR KING': 'Jaipur King',
+    'FARIDABAD': 'Faridabad', 
+    'GHAZIABAD': 'Ghaziabad',
+    'GALI': 'Gali',
+    'DISAWER': 'Disawer',
+    'DIAMOND KING': 'Diamond King'
+  };
+
+  // Fetch real bet history from API
+  const fetchBetHistory = async () => {
+    try {
+      setLoading(true);
+      const response = await betService.getBetHistory(1, 100); // Fetch last 100 bets
+      
+      if (response.success && response.data) {
+        const formattedBets = response.data.bets.map((bet: any) => ({
+          id: bet.id,
+          game: gameNamesMap[bet.gameName?.toUpperCase()] || bet.gameName || 'Unknown Game',
+          number: bet.number || '',
+          amount: bet.amount || 0,
+          type: bet.type === 'ANDAR' ? 'andar' : bet.type === 'BAHAR' ? 'bahar' : 'number',
+          status: bet.status === 'WON' ? 'win' : bet.status === 'LOST' ? 'loss' : 'pending',
+          winAmount: bet.winAmount || 0,
+          timestamp: new Date(bet.placedAt).getTime(),
+          placedAt: bet.placedAt
+        }));
+
+        // Filter for last 7 days only
+        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        const last7DaysBets = formattedBets.filter((bet: any) => bet.timestamp >= sevenDaysAgo);
+        
+        setRealBetHistory(last7DaysBets);
+      } else {
+        console.log('No bet history found or API error');
+        setRealBetHistory([]);
+      }
+    } catch (error) {
+      console.error('Error fetching bet history:', error);
+      setRealBetHistory([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBetHistory();
+  }, []);
+
+  // Use real data if available, otherwise use prop data, otherwise use empty array
+  const currentHistory = realBetHistory.length > 0 ? realBetHistory : (betHistory || []);
 
   // Get last 7 days data only
   const getLast7DaysHistory = () => {
     const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    return betHistory.filter(bet => bet.timestamp && bet.timestamp >= sevenDaysAgo);
+    return currentHistory.filter(bet => bet.timestamp && bet.timestamp >= sevenDaysAgo);
   };
 
   // Get unique game names for dropdown
@@ -84,7 +90,7 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
     } else {
       setFilteredHistory(last7DaysHistory.filter(bet => bet.game === selectedGame));
     }
-  }, [selectedGame, betHistory]);
+  }, [selectedGame, realBetHistory, betHistory]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -106,27 +112,29 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
   };
 
   const getBetTypeText = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case 'andar': return 'अंदर';
       case 'bahar': return 'बाहर';
       case 'number': return 'नंबर';
+      case 'single': return 'सिंगल';
+      case 'jodi': return 'जोड़ी';
       default: return type;
     }
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case 'win': return '✅ जीत';
-      case 'loss': return '❌ हार';
+    switch (status.toLowerCase()) {
+      case 'win': case 'won': return '✅ जीत';
+      case 'loss': case 'lost': return '❌ हार';
       case 'pending': return '⏳ पेंडिंग';
       default: return status;
     }
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'win': return '#00FF88';
-      case 'loss': return '#FF4757';
+    switch (status.toLowerCase()) {
+      case 'win': case 'won': return '#00FF88';
+      case 'loss': case 'lost': return '#FF4757';
       case 'pending': return '#FFD700';
       default: return '#999';
     }
@@ -156,8 +164,9 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
   const calculateStats = () => {
     const totalBets = filteredHistory.length;
     const totalAmount = filteredHistory.reduce((sum, bet) => sum + bet.amount, 0);
-    const totalWin = filteredHistory.filter(bet => bet.status === 'win').reduce((sum, bet) => sum + (bet.winAmount || 0), 0);
-    const winRate = totalBets > 0 ? ((filteredHistory.filter(bet => bet.status === 'win').length / totalBets) * 100).toFixed(1) : '0';
+    const totalWin = filteredHistory.filter(bet => bet.status === 'win' || bet.status === 'won').reduce((sum, bet) => sum + (bet.winAmount || 0), 0);
+    const winCount = filteredHistory.filter(bet => bet.status === 'win' || bet.status === 'won').length;
+    const winRate = totalBets > 0 ? ((winCount / totalBets) * 100).toFixed(1) : '0';
 
     return { totalBets, totalAmount, totalWin, winRate };
   };
@@ -216,95 +225,117 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
     </ScrollView>
   );
 
+  const renderLoadingView = () => (
+    <View style={styles.loadingContainer}>
+      <Text style={styles.loadingIcon}>⏳</Text>
+      <Text style={styles.loadingTitle}>गेम हिस्ट्री लोड हो रही है...</Text>
+      <Text style={styles.loadingMessage}>कृपया प्रतीक्षा करें</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>📊 गेम हिस्ट्री (Last 7 Days)</Text>
         <Text style={styles.headerSubtitle}>सभी 6 गेम्स का रिकॉर्ड</Text>
+        <TouchableOpacity style={styles.refreshButton} onPress={fetchBetHistory}>
+          <Ionicons name="refresh" size={20} color="#4A90E2" />
+          <Text style={styles.refreshText}>Refresh</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Statistics Cards */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{stats.totalBets}</Text>
-          <Text style={styles.statLabel}>कुल बेट्स</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>₹{stats.totalAmount}</Text>
-          <Text style={styles.statLabel}>कुल राशि</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>₹{stats.totalWin}</Text>
-          <Text style={styles.statLabel}>कुल जीत</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{stats.winRate}%</Text>
-          <Text style={styles.statLabel}>जीत दर</Text>
-        </View>
-      </View>
-
-      {/* Filter Section */}
-      <View style={styles.filterContainer}>
-        <View style={styles.filterRow}>
-          <View style={styles.filterSection}>
-            <Text style={styles.filterLabel}>🎮 गेम फिल्टर</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={selectedGame}
-                onValueChange={(itemValue) => setSelectedGame(itemValue)}
-                style={styles.picker}
-                dropdownIconColor="#4A90E2"
-              >
-                {getUniqueGames().map((game, index) => (
-                  <Picker.Item
-                    key={index}
-                    label={game}
-                    value={game}
-                    color="#fff"
-                  />
-                ))}
-              </Picker>
+      {loading ? (
+        renderLoadingView()
+      ) : (
+        <>
+          {/* Statistics Cards */}
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{stats.totalBets}</Text>
+              <Text style={styles.statLabel}>कुल बेट्स</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>₹{stats.totalAmount}</Text>
+              <Text style={styles.statLabel}>कुल राशि</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>₹{stats.totalWin}</Text>
+              <Text style={styles.statLabel}>कुल जीत</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{stats.winRate}%</Text>
+              <Text style={styles.statLabel}>जीत दर</Text>
             </View>
           </View>
 
-          <TouchableOpacity
-            style={[styles.viewToggle, viewMode === 'table' && styles.activeToggle]}
-            onPress={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
-          >
-            <Ionicons 
-              name={viewMode === 'table' ? 'grid-outline' : 'list-outline'} 
-              size={16} 
-              color={viewMode === 'table' ? '#4A90E2' : '#999'} 
-            />
-            <Text style={[styles.toggleText, viewMode === 'table' && styles.activeToggleText]}>
-              {viewMode === 'table' ? 'कार्ड व्यू' : 'टेबल व्यू'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          {/* Filter Section */}
+          <View style={styles.filterContainer}>
+            <View style={styles.filterRow}>
+              <View style={styles.filterSection}>
+                <Text style={styles.filterLabel}>🎮 गेम फिल्टर</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={selectedGame}
+                    onValueChange={(itemValue) => setSelectedGame(itemValue)}
+                    style={styles.picker}
+                    dropdownIconColor="#4A90E2"
+                  >
+                    {getUniqueGames().map((game, index) => (
+                      <Picker.Item
+                        key={index}
+                        label={game}
+                        value={game}
+                        color="#fff"
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
 
-      {/* History Content */}
-      {filteredHistory.length > 0 ? (
-        renderTableView()
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📊</Text>
-          <Text style={styles.emptyTitle}>कोई गेम हिस्ट्री नहीं मिली</Text>
-          <Text style={styles.emptyMessage}>
-            {selectedGame === 'All Games' 
-              ? 'पिछले 7 दिनों में कोई गेम नहीं खेला गया'
-              : `${selectedGame} के लिए कोई हिस्ट्री नहीं मिली`
-            }
-          </Text>
-          <Text style={styles.emptySubMessage}>
-            🎮 पहले कुछ गेम खेलें फिर यहाँ हिस्ट्री देखें
-          </Text>
-        </View>
+              <TouchableOpacity
+                style={[styles.viewToggle, viewMode === 'table' && styles.activeToggle]}
+                onPress={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
+              >
+                <Ionicons 
+                  name={viewMode === 'table' ? 'grid-outline' : 'list-outline'} 
+                  size={16} 
+                  color={viewMode === 'table' ? '#4A90E2' : '#999'} 
+                />
+                <Text style={[styles.toggleText, viewMode === 'table' && styles.activeToggleText]}>
+                  {viewMode === 'table' ? 'कार्ड व्यू' : 'टेबल व्यू'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* History Content */}
+          {filteredHistory.length > 0 ? (
+            renderTableView()
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>📊</Text>
+              <Text style={styles.emptyTitle}>कोई गेम हिस्ट्री नहीं मिली</Text>
+              <Text style={styles.emptyMessage}>
+                {selectedGame === 'All Games' 
+                  ? 'पिछले 7 दिनों में कोई गेम नहीं खेला गया'
+                  : `${selectedGame} के लिए कोई हिस्ट्री नहीं मिली`
+                }
+              </Text>
+              <Text style={styles.emptySubMessage}>
+                🎮 पहले कुछ गेम खेलें फिर यहाँ हिस्ट्री देखें
+              </Text>
+              <TouchableOpacity style={styles.refreshButtonEmpty} onPress={fetchBetHistory}>
+                <Ionicons name="refresh" size={20} color="#4A90E2" />
+                <Text style={styles.refreshText}>Data Refresh करें</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </>
       )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -325,6 +356,53 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   headerSubtitle: {
+    fontSize: 14,
+    color: '#999',
+    marginBottom: 10,
+  },
+  refreshButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    backgroundColor: '#1a2a3a',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#4A90E2',
+  },
+  refreshButtonEmpty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#1a2a3a',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#4A90E2',
+    marginTop: 20,
+  },
+  refreshText: {
+    color: '#4A90E2',
+    marginLeft: 5,
+    fontSize: 12,
+  },
+
+  // Loading
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  loadingIcon: {
+    fontSize: 60,
+    marginBottom: 20,
+  },
+  loadingTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+    marginBottom: 10,
+  },
+  loadingMessage: {
     fontSize: 14,
     color: '#999',
   },
@@ -508,3 +586,5 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 });
+
+export default GameHistory;
