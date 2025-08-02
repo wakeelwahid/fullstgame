@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 
@@ -7,242 +7,132 @@ interface GameHistoryProps {
   betHistory?: any[];
 }
 
-// Enhanced mock game history data for last 30 days
+// Enhanced mock game history data for last 7 days - all 6 games
 const mockGameHistory = [
-  // Today
-  {
-    id: '1',
-    game: 'Jaipur King',
-    number: '45',
-    amount: 100,
-    type: 'andar',
-    status: 'win',
-    winAmount: 180,
-    timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000), // Today
-  },
-  {
-    id: '2',
-    game: 'Delhi Bazaar',
-    number: '23',
-    amount: 50,
-    type: 'bahar',
-    status: 'loss',
-    timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000), // Today
-  },
-  // Yesterday
-  {
-    id: '3',
-    game: 'Jaipur King',
-    number: '8',
-    amount: 200,
-    type: 'andar',
-    status: 'win',
-    winAmount: 360,
-    timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
-  },
-  {
-    id: '4',
-    game: 'Mumbai King',
-    number: '91',
-    amount: 150,
-    type: 'bahar',
-    status: 'pending',
-    timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
-  },
+  // Today's bets
+  { id: '1', game: 'Jaipur King', number: '45', amount: 100, type: 'number', status: 'win', winAmount: 9000, timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000) },
+  { id: '2', game: 'Faridabad', number: '7', amount: 50, type: 'andar', status: 'win', winAmount: 450, timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000) },
+  { id: '3', game: 'Gali', number: '3', amount: 75, type: 'bahar', status: 'loss', timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000) },
+  { id: '4', game: 'Diamond King', number: '89', amount: 200, type: 'number', status: 'pending', timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000) },
+
+  // Yesterday's bets
+  { id: '5', game: 'Disawer', number: '2', amount: 120, type: 'andar', status: 'win', winAmount: 1080, timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) },
+  { id: '6', game: 'Ghaziabad', number: '8', amount: 80, type: 'bahar', status: 'loss', timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) },
+  { id: '7', game: 'Jaipur King', number: '34', amount: 150, type: 'number', status: 'win', winAmount: 13500, timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) },
+  { id: '8', game: 'Faridabad', number: '6', amount: 90, type: 'andar', status: 'loss', timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000) },
+
   // 2 days ago
-  {
-    id: '5',
-    game: 'Delhi Bazaar',
-    number: '5',
-    amount: 75,
-    type: 'andar',
-    status: 'loss',
-    timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
-  },
-  {
-    id: '6',
-    game: 'Jaipur King',
-    number: '34',
-    amount: 300,
-    type: 'bahar',
-    status: 'win',
-    winAmount: 540,
-    timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
-  },
+  { id: '9', game: 'Gali', number: '91', amount: 110, type: 'number', status: 'win', winAmount: 9900, timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) },
+  { id: '10', game: 'Diamond King', number: '4', amount: 60, type: 'bahar', status: 'loss', timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) },
+  { id: '11', game: 'Disawer', number: '77', amount: 180, type: 'number', status: 'win', winAmount: 16200, timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) },
+  { id: '12', game: 'Ghaziabad', number: '9', amount: 70, type: 'andar', status: 'win', winAmount: 630, timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000) },
+
   // 3 days ago
-  {
-    id: '7',
-    game: 'Mumbai King',
-    number: '7',
-    amount: 100,
-    type: 'andar',
-    status: 'loss',
-    timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000), // 3 days ago
-  },
-  {
-    id: '8',
-    game: 'Ghaziabad',
-    number: '89',
-    amount: 250,
-    type: 'bahar',
-    status: 'win',
-    winAmount: 450,
-    timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000), // 3 days ago
-  },
+  { id: '13', game: 'Jaipur King', number: '1', amount: 85, type: 'bahar', status: 'loss', timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) },
+  { id: '14', game: 'Faridabad', number: '56', amount: 130, type: 'number', status: 'win', winAmount: 11700, timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) },
+  { id: '15', game: 'Gali', number: '0', amount: 95, type: 'andar', status: 'win', winAmount: 855, timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) },
+  { id: '16', game: 'Diamond King', number: '23', amount: 160, type: 'number', status: 'loss', timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) },
+
   // 4 days ago
-  {
-    id: '9',
-    game: 'Faridabad',
-    number: '12',
-    amount: 80,
-    type: 'andar',
-    status: 'loss',
-    timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000), // 4 days ago
-  },
+  { id: '17', game: 'Disawer', number: '5', amount: 75, type: 'bahar', status: 'win', winAmount: 675, timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) },
+  { id: '18', game: 'Ghaziabad', number: '88', amount: 220, type: 'number', status: 'win', winAmount: 19800, timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) },
+  { id: '19', game: 'Jaipur King', number: '7', amount: 55, type: 'andar', status: 'loss', timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) },
+  { id: '20', game: 'Faridabad', number: '3', amount: 100, type: 'bahar', status: 'win', winAmount: 900, timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000) },
+
   // 5 days ago
-  {
-    id: '10',
-    game: 'Disawar',
-    number: '67',
-    amount: 120,
-    type: 'bahar',
-    status: 'win',
-    winAmount: 216,
-    timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000), // 5 days ago
-  },
+  { id: '21', game: 'Gali', number: '45', amount: 140, type: 'number', status: 'loss', timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) },
+  { id: '22', game: 'Diamond King', number: '8', amount: 65, type: 'andar', status: 'win', winAmount: 585, timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) },
+  { id: '23', game: 'Disawer', number: '2', amount: 90, type: 'bahar', status: 'loss', timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) },
+  { id: '24', game: 'Ghaziabad', number: '67', amount: 175, type: 'number', status: 'win', winAmount: 15750, timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000) },
+
   // 6 days ago
-  {
-    id: '11',
-    game: 'Gali',
-    number: '33',
-    amount: 90,
-    type: 'andar',
-    status: 'loss',
-    timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000), // 6 days ago
-  },
+  { id: '25', game: 'Jaipur King', number: '9', amount: 80, type: 'bahar', status: 'win', winAmount: 720, timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) },
+  { id: '26', game: 'Faridabad', number: '12', amount: 115, type: 'number', status: 'loss', timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) },
+  { id: '27', game: 'Gali', number: '4', amount: 70, type: 'andar', status: 'win', winAmount: 630, timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) },
+  { id: '28', game: 'Diamond King', number: '6', amount: 125, type: 'bahar', status: 'loss', timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000) },
+
   // 7 days ago
-  {
-    id: '12',
-    game: 'Diamond King',
-    number: '55',
-    amount: 180,
-    type: 'bahar',
-    status: 'win',
-    winAmount: 324,
-    timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000), // 7 days ago
-  },
-  // 15 days ago
-  {
-    id: '13',
-    game: 'Jaipur King',
-    number: '21',
-    amount: 60,
-    type: 'andar',
-    status: 'loss',
-    timestamp: Date.now() - (15 * 24 * 60 * 60 * 1000), // 15 days ago
-  },
-  // 20 days ago
-  {
-    id: '14',
-    game: 'Delhi Bazaar',
-    number: '77',
-    amount: 140,
-    type: 'bahar',
-    status: 'win',
-    winAmount: 252,
-    timestamp: Date.now() - (20 * 24 * 60 * 60 * 1000), // 20 days ago
-  },
-  // 25 days ago
-  {
-    id: '15',
-    game: 'Mumbai King',
-    number: '99',
-    amount: 200,
-    type: 'andar',
-    status: 'win',
-    winAmount: 360,
-    timestamp: Date.now() - (25 * 24 * 60 * 60 * 1000), // 25 days ago
-  }
+  { id: '29', game: 'Disawer', number: '99', amount: 190, type: 'number', status: 'win', winAmount: 17100, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) },
+  { id: '30', game: 'Ghaziabad', number: '1', amount: 85, type: 'andar', status: 'loss', timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) },
+  { id: '31', game: 'Jaipur King', number: '78', amount: 150, type: 'number', status: 'win', winAmount: 13500, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) },
+  { id: '32', game: 'Faridabad', number: '5', amount: 95, type: 'bahar', status: 'win', winAmount: 855, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) }
 ];
 
 export default function GameHistory({ betHistory = mockGameHistory }: GameHistoryProps) {
   const [selectedGame, setSelectedGame] = useState<string>('All Games');
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('Last 7 Days');
   const [filteredHistory, setFilteredHistory] = useState<any[]>([]);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
-  // Get filtered history based on date range
-  const getFilteredHistoryByDate = () => {
-    const now = Date.now();
-    let filterTimestamp;
-
-    switch (selectedDateFilter) {
-      case 'Today':
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        filterTimestamp = todayStart.getTime();
-        break;
-      case 'Yesterday':
-        const yesterdayStart = new Date();
-        yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-        yesterdayStart.setHours(0, 0, 0, 0);
-        const yesterdayEnd = new Date();
-        yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
-        yesterdayEnd.setHours(23, 59, 59, 999);
-        return betHistory.filter(bet => 
-          bet.timestamp && 
-          bet.timestamp >= yesterdayStart.getTime() && 
-          bet.timestamp <= yesterdayEnd.getTime()
-        );
-      case 'Last 7 Days':
-        filterTimestamp = now - (7 * 24 * 60 * 60 * 1000);
-        break;
-      case 'Last 15 Days':
-        filterTimestamp = now - (15 * 24 * 60 * 60 * 1000);
-        break;
-      case 'Last 30 Days':
-        filterTimestamp = now - (30 * 24 * 60 * 60 * 1000);
-        break;
-      default:
-        filterTimestamp = now - (7 * 24 * 60 * 60 * 1000);
-    }
-
-    return betHistory.filter(bet => bet.timestamp && bet.timestamp >= filterTimestamp);
+  // Get last 7 days data only
+  const getLast7DaysHistory = () => {
+    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    return betHistory.filter(bet => bet.timestamp && bet.timestamp >= sevenDaysAgo);
   };
 
   // Get unique game names for dropdown
   const getUniqueGames = () => {
-    const games = [...new Set(betHistory.map(bet => bet.game))];
-    return ['All Games', ...games];
+    const games = [...new Set(getLast7DaysHistory().map(bet => bet.game))];
+    return ['All Games', ...games.sort()];
   };
 
   useEffect(() => {
-    const dateFilteredHistory = getFilteredHistoryByDate();
+    const last7DaysHistory = getLast7DaysHistory();
 
     if (selectedGame === 'All Games') {
-      setFilteredHistory(dateFilteredHistory);
+      setFilteredHistory(last7DaysHistory);
     } else {
-      setFilteredHistory(dateFilteredHistory.filter(bet => bet.game === selectedGame));
+      setFilteredHistory(last7DaysHistory.filter(bet => bet.game === selectedGame));
     }
-  }, [selectedGame, selectedDateFilter, betHistory]);
+  }, [selectedGame, betHistory]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString('en-GB', { 
-      day: '2-digit', 
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'आज (Today)';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'कल (Yesterday)';
+    } else {
+      return date.toLocaleDateString('hi-IN', { 
+        day: '2-digit', 
+        month: '2-digit',
+        year: 'numeric'
+      });
+    }
   };
 
   const getBetTypeText = (type: string) => {
     switch (type) {
-      case 'andar': return 'Andar';
-      case 'bahar': return 'Bahar';
+      case 'andar': return 'अंदर';
+      case 'bahar': return 'बाहर';
+      case 'number': return 'नंबर';
       default: return type;
     }
   };
 
-  // Group bets by date
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'win': return '✅ जीत';
+      case 'loss': return '❌ हार';
+      case 'pending': return '⏳ पेंडिंग';
+      default: return status;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'win': return '#00FF88';
+      case 'loss': return '#FF4757';
+      case 'pending': return '#FFD700';
+      default: return '#999';
+    }
+  };
+
+  // Group bets by date for table view
   const groupBetsByDate = () => {
     const grouped = filteredHistory.reduce((acc, bet) => {
       const dateKey = formatDate(bet.timestamp);
@@ -254,7 +144,6 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
     }, {} as Record<string, any[]>);
 
     return Object.entries(grouped).sort((a, b) => {
-      // Sort by date, with today first
       const aDate = a[1][0]?.timestamp || 0;
       const bDate = b[1][0]?.timestamp || 0;
       return bDate - aDate;
@@ -263,25 +152,108 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
 
   const groupedBets = groupBetsByDate();
 
+  // Calculate statistics
+  const calculateStats = () => {
+    const totalBets = filteredHistory.length;
+    const totalAmount = filteredHistory.reduce((sum, bet) => sum + bet.amount, 0);
+    const totalWin = filteredHistory.filter(bet => bet.status === 'win').reduce((sum, bet) => sum + (bet.winAmount || 0), 0);
+    const winRate = totalBets > 0 ? ((filteredHistory.filter(bet => bet.status === 'win').length / totalBets) * 100).toFixed(1) : '0';
+
+    return { totalBets, totalAmount, totalWin, winRate };
+  };
+
+  const stats = calculateStats();
+
+  const renderTableView = () => (
+    <ScrollView style={styles.tableContainer} showsVerticalScrollIndicator={false}>
+      {groupedBets.map(([date, bets], dateIndex) => (
+        <View key={dateIndex} style={styles.dateGroup}>
+          <View style={styles.dateHeader}>
+            <Text style={styles.dateTitle}>{date}</Text>
+            <Text style={styles.dateBetCount}>{bets.length} बेट्स</Text>
+          </View>
+
+          <View style={styles.table}>
+            {/* Table Header */}
+            <View style={styles.tableHeader}>
+              <Text style={[styles.tableHeaderText, { flex: 2 }]}>गेम</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1 }]}>नंबर</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1 }]}>टाइप</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1 }]}>राशि</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1 }]}>स्थिति</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1 }]}>जीत</Text>
+            </View>
+
+            {/* Table Rows */}
+            {bets.map((bet, betIndex) => (
+              <View key={betIndex} style={[
+                styles.tableRow,
+                betIndex % 2 === 0 ? styles.evenRow : styles.oddRow
+              ]}>
+                <Text style={[styles.tableCellText, { flex: 2 }]} numberOfLines={1}>
+                  {bet.game}
+                </Text>
+                <Text style={[styles.tableCellText, { flex: 1, fontWeight: 'bold', color: '#FFD700' }]}>
+                  {bet.number}
+                </Text>
+                <Text style={[styles.tableCellText, { flex: 1, fontSize: 10 }]}>
+                  {getBetTypeText(bet.type)}
+                </Text>
+                <Text style={[styles.tableCellText, { flex: 1, color: '#00FF88' }]}>
+                  ₹{bet.amount}
+                </Text>
+                <Text style={[styles.tableCellText, { flex: 1, color: getStatusColor(bet.status), fontSize: 10 }]}>
+                  {getStatusText(bet.status)}
+                </Text>
+                <Text style={[styles.tableCellText, { flex: 1, color: bet.winAmount ? '#00FF88' : '#999', fontSize: 10 }]}>
+                  {bet.winAmount ? `₹${bet.winAmount}` : '-'}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      ))}
+    </ScrollView>
+  );
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>📊 Game History</Text>
-     
+        <Text style={styles.headerTitle}>📊 गेम हिस्ट्री (Last 7 Days)</Text>
+        <Text style={styles.headerSubtitle}>सभी 6 गेम्स का रिकॉर्ड</Text>
       </View>
 
-      {/* Redesigned Stylish Filter Section */}
+      {/* Statistics Cards */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{stats.totalBets}</Text>
+          <Text style={styles.statLabel}>कुल बेट्स</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>₹{stats.totalAmount}</Text>
+          <Text style={styles.statLabel}>कुल राशि</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>₹{stats.totalWin}</Text>
+          <Text style={styles.statLabel}>कुल जीत</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{stats.winRate}%</Text>
+          <Text style={styles.statLabel}>जीत दर</Text>
+        </View>
+      </View>
+
+      {/* Filter Section */}
       <View style={styles.filterContainer}>
-        <View style={styles.filterWrapper}>
-          {/* Game Filter */}
+        <View style={styles.filterRow}>
           <View style={styles.filterSection}>
-            <Text style={styles.filterSectionTitle}>🎮 Games</Text>
-            <View style={styles.compactPickerContainer}>
+            <Text style={styles.filterLabel}>🎮 गेम फिल्टर</Text>
+            <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={selectedGame}
                 onValueChange={(itemValue) => setSelectedGame(itemValue)}
-                style={styles.compactPicker}
+                style={styles.picker}
                 dropdownIconColor="#4A90E2"
               >
                 {getUniqueGames().map((game, index) => (
@@ -296,115 +268,40 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
             </View>
           </View>
 
-          {/* Date Filter */}
-          <View style={styles.filterSection}>
-            <Text style={styles.filterSectionTitle}>📅 Period</Text>
-            <View style={styles.compactPickerContainer}>
-              <Picker
-                selectedValue={selectedDateFilter}
-                onValueChange={(itemValue) => setSelectedDateFilter(itemValue)}
-                style={styles.compactPicker}
-                dropdownIconColor="#4A90E2"
-              >
-                <Picker.Item label="Today" value="Today" color="#fff" />
-                <Picker.Item label="Yesterday" value="Yesterday" color="#fff" />
-                <Picker.Item label="Last 7 Days" value="Last 7 Days" color="#fff" />
-                <Picker.Item label="Last 15 Days" value="Last 15 Days" color="#fff" />
-                <Picker.Item label="Last 30 Days" value="Last 30 Days" color="#fff" />
-              </Picker>
-            </View>
-          </View>
-
-          {/* Filter Stats */}
-          <View style={styles.filterStatsContainer}>
-            <Text style={styles.filterStatsText}>
-              {filteredHistory.length} {filteredHistory.length === 1 ? 'bet' : 'bets'}
+          <TouchableOpacity
+            style={[styles.viewToggle, viewMode === 'table' && styles.activeToggle]}
+            onPress={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
+          >
+            <Ionicons 
+              name={viewMode === 'table' ? 'grid-outline' : 'list-outline'} 
+              size={16} 
+              color={viewMode === 'table' ? '#4A90E2' : '#999'} 
+            />
+            <Text style={[styles.toggleText, viewMode === 'table' && styles.activeToggleText]}>
+              {viewMode === 'table' ? 'कार्ड व्यू' : 'टेबल व्यू'}
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
-      {/* History List */}
-      <ScrollView style={styles.historyContainer} showsVerticalScrollIndicator={false}>
-        {groupedBets.length > 0 ? (
-          groupedBets.map(([date, bets], dateIndex) => (
-            <View key={dateIndex}>
-              <View style={styles.dateSection}>
-                {/* Date Header */}
-                <View style={styles.dateHeader}>
-                  <Text style={styles.dateTitle}>{date}</Text>
-                  <Text style={styles.dateBetCount}>{bets.length} bets</Text>
-                </View>
-
-                {/* Horizontal Scrollable Bets */}
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.betsScrollContainer}
-                  contentContainerStyle={styles.betsScrollContent}
-                >
-                  {bets.map((bet, betIndex) => (
-                    <View key={betIndex} style={[
-                      styles.betCard,
-                      bet.status === 'win' && styles.winCard,
-                      bet.status === 'loss' && styles.lossCard,
-                      bet.status === 'pending' && styles.pendingCard
-                    ]}>
-                      <View style={styles.gameNameContainer}>
-                        <Text style={styles.gameName}>🎮 {bet.game}</Text>
-                        <View style={[
-                          styles.statusBadge,
-                          styles[`status${bet.status.charAt(0).toUpperCase() + bet.status.slice(1)}`]
-                        ]}>
-                          <Text style={styles.statusText}>
-                            {bet.status === 'win' ? '✅' : bet.status === 'loss' ? '❌' : '⏳'}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View style={styles.betDetailsContainer}>
-                        <View style={styles.numberContainer}>
-                          <Text style={styles.betNumber}>{bet.number}</Text>
-                          <Text style={styles.betType}>{getBetTypeText(bet.type)}</Text>
-                        </View>
-
-                        <View style={styles.amountContainer}>
-                          <Text style={styles.betAmount}>₹{bet.amount}</Text>
-                          {bet.status === 'win' && bet.winAmount && (
-                            <Text style={styles.winAmount}>+₹{bet.winAmount}</Text>
-                          )}
-                          {bet.status === 'loss' && (
-                            <Text style={styles.lossAmount}>-₹{bet.amount}</Text>
-                          )}
-                        </View>
-                      </View>
-                    </View>
-                  ))}
-                </ScrollView>
-              </View>
-              
-              {/* Horizontal Divider Line - show between sections, not after last one */}
-              {dateIndex < groupedBets.length - 1 && (
-                <View style={styles.dateDivider} />
-              )}
-            </View>
-          ))
-        ) : (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📊</Text>
-            <Text style={styles.emptyTitle}>No Game History Found</Text>
-            <Text style={styles.emptyMessage}>
-              {selectedGame === 'All Games' 
-                ? 'No games played in the last 7 days'
-                : `No history found for ${selectedGame}`
-              }
-            </Text>
-            <Text style={styles.emptySubMessage}>
-              🎮 Play some games first to see your history here
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+      {/* History Content */}
+      {filteredHistory.length > 0 ? (
+        renderTableView()
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>📊</Text>
+          <Text style={styles.emptyTitle}>कोई गेम हिस्ट्री नहीं मिली</Text>
+          <Text style={styles.emptyMessage}>
+            {selectedGame === 'All Games' 
+              ? 'पिछले 7 दिनों में कोई गेम नहीं खेला गया'
+              : `${selectedGame} के लिए कोई हिस्ट्री नहीं मिली`
+            }
+          </Text>
+          <Text style={styles.emptySubMessage}>
+            🎮 पहले कुछ गेम खेलें फिर यहाँ हिस्ट्री देखें
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -431,166 +328,154 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#999',
   },
+
+  // Statistics
+  statsContainer: {
+    flexDirection: 'row',
+    padding: 15,
+    gap: 10,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  statNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+  },
+  statLabel: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 2,
+  },
+
+  // Filter
   filterContainer: {
     backgroundColor: '#1a1a1a',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
   },
-  filterWrapper: {
+  filterRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 12,
   },
   filterSection: {
     flex: 1,
+    marginRight: 15,
   },
-  filterSectionTitle: {
-    fontSize: 10,
+  filterLabel: {
+    fontSize: 12,
     color: '#4A90E2',
     fontWeight: 'bold',
-    marginBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    marginBottom: 5,
   },
-  compactPickerContainer: {
+  pickerContainer: {
     backgroundColor: '#333',
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#4A90E2',
-    height: 32,
-    overflow: 'hidden',
+    height: 40,
   },
-  compactPicker: {
+  picker: {
     color: '#fff',
     backgroundColor: '#333',
-    fontSize: 12,
-    height: 32,
+    height: 40,
   },
-  dateFilterContainer: {
-    height: 32,
-  },
-  dateFilterButton: {
-    backgroundColor: '#333',
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#4A90E2',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    height: 32,
-    justifyContent: 'center',
+  viewToggle: {
+    flexDirection: 'row',
     alignItems: 'center',
+    padding: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#333',
+    gap: 5,
   },
-  dateFilterText: {
-    color: '#fff',
+  activeToggle: {
+    borderColor: '#4A90E2',
+    backgroundColor: '#1a2a3a',
+  },
+  toggleText: {
     fontSize: 10,
-    fontWeight: '600',
-  },
-  filterStatsContainer: {
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    minWidth: 60,
-  },
-  filterStatsText: {
-    fontSize: 9,
     color: '#999',
-    backgroundColor: '#333',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 8,
-    textAlign: 'center',
-    fontWeight: 'bold',
   },
-  historyContainer: {
+  activeToggleText: {
+    color: '#4A90E2',
+  },
+
+  // Table
+  tableContainer: {
     flex: 1,
     padding: 15,
   },
-  dateSection: {
-    marginBottom: 15,
+  dateGroup: {
+    marginBottom: 20,
   },
   dateHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'transparent',
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 5,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 6,
     marginBottom: 10,
   },
   dateTitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#666',
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#4A90E2',
   },
   dateBetCount: {
-    fontSize: 10,
-    color: '#555',
+    fontSize: 12,
+    color: '#999',
   },
-  dateDivider: {
-    height: 1,
-    backgroundColor: '#333',
-    marginVertical: 15,
-    marginHorizontal: 10,
-  },
-  betsScrollContainer: {
-    marginBottom: 10,
-  },
-  betsScrollContent: {
-    paddingRight: 15,
-    paddingLeft: 5,
-  },
-  betCard: {
+  table: {
     backgroundColor: '#1a1a1a',
-    borderRadius: 10,
-    padding: 12,
-    marginRight: 12,
+    borderRadius: 8,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#333',
-    minWidth: 120,
-    maxWidth: 140,
   },
-  gameNameContainer: {
-    marginBottom: 10,
-    alignItems: 'center',
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#333',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
-  gameName: {
+  tableHeaderText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: 'bold',
+    color: '#4A90E2',
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2a2a2a',
+  },
+  evenRow: {
+    backgroundColor: '#1a1a1a',
+  },
+  oddRow: {
+    backgroundColor: '#222',
+  },
+  tableCellText: {
+    fontSize: 11,
     color: '#fff',
     textAlign: 'center',
   },
-  betDetailsContainer: {
-    alignItems: 'center',
-  },
-  numberContainer: {
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  betNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFD700',
-    marginBottom: 4,
-  },
-  betType: {
-    fontSize: 9,
-    color: '#4A90E2',
-    backgroundColor: '#333',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    fontWeight: 'bold',
-  },
-  amountContainer: {
-    alignItems: 'center',
-  },
-  betAmount: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#00FF88',
-  },
+
+  // Empty State
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -621,55 +506,5 @@ const styles = StyleSheet.create({
     color: '#4A90E2',
     textAlign: 'center',
     fontStyle: 'italic',
-  },
-  // Status-specific card styles
-  winCard: {
-    borderColor: '#00FF88',
-    borderWidth: 1,
-    backgroundColor: '#1a2e1a',
-  },
-  lossCard: {
-    borderColor: '#FF4757',
-    borderWidth: 1,
-    backgroundColor: '#2e1a1a',
-  },
-  pendingCard: {
-    borderColor: '#FFD700',
-    borderWidth: 1,
-    backgroundColor: '#2e2a1a',
-  },
-  // Status badge styles
-  statusBadge: {
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginTop: 4,
-    alignSelf: 'center',
-  },
-  statusWin: {
-    backgroundColor: '#00FF88',
-  },
-  statusLoss: {
-    backgroundColor: '#FF4757',
-  },
-  statusPending: {
-    backgroundColor: '#FFD700',
-  },
-  statusText: {
-    fontSize: 8,
-    fontWeight: 'bold',
-  },
-  // Win/Loss amount styles
-  winAmount: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#00FF88',
-    marginTop: 2,
-  },
-  lossAmount: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#FF4757',
-    marginTop: 2,
   },
 });
