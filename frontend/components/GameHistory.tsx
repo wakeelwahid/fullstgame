@@ -12,7 +12,7 @@ interface GameHistoryProps {
 const GameHistory = ({ betHistory }: GameHistoryProps) => {
   const [selectedGame, setSelectedGame] = useState<string>('All Games');
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('Last 7 Days');
-  const [filteredHistory, setFilteredHistory] = useState<any[]>([]);
+  const [filteredHistory, setFilteredHistory] = useState<any[]>(staticTestData);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [realBetHistory, setRealBetHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(false); // Disabled for static data testing
@@ -119,7 +119,9 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
   // Get last 7 days data only
   const getLast7DaysHistory = () => {
     const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    return currentHistory.filter(bet => bet.timestamp && bet.timestamp >= sevenDaysAgo);
+    const filtered = currentHistory.filter(bet => bet.timestamp && bet.timestamp >= sevenDaysAgo);
+    console.log('Filtered last 7 days data:', filtered.length, 'items');
+    return filtered;
   };
 
   // Get unique game names for dropdown
@@ -130,13 +132,18 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
 
   useEffect(() => {
     const last7DaysHistory = getLast7DaysHistory();
+    console.log('Processing history for game filter:', selectedGame);
+    console.log('Available history:', last7DaysHistory.length);
 
     if (selectedGame === 'All Games') {
       setFilteredHistory(last7DaysHistory);
+      console.log('Set filtered history (all games):', last7DaysHistory.length);
     } else {
-      setFilteredHistory(last7DaysHistory.filter(bet => bet.game === selectedGame));
+      const gameFiltered = last7DaysHistory.filter(bet => bet.game === selectedGame);
+      setFilteredHistory(gameFiltered);
+      console.log('Set filtered history for', selectedGame, ':', gameFiltered.length);
     }
-  }, [selectedGame, realBetHistory, betHistory]);
+  }, [selectedGame, realBetHistory, betHistory, staticTestData]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -356,7 +363,7 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
           </View>
 
           {/* History Content */}
-          {filteredHistory.length > 0 ? (
+          {filteredHistory && filteredHistory.length > 0 ? (
             renderTableView()
           ) : (
             <View style={styles.emptyContainer}>
@@ -370,6 +377,9 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
               </Text>
               <Text style={styles.emptySubMessage}>
                 🎮 पहले कुछ गेम खेलें फिर यहाँ हिस्ट्री देखें
+              </Text>
+              <Text style={styles.emptySubMessage}>
+                Debug: Static Data: {staticTestData.length} | Filtered: {filteredHistory.length} | Selected: {selectedGame}
               </Text>
               <TouchableOpacity style={styles.refreshButtonEmpty} onPress={fetchBetHistory}>
                 <Ionicons name="refresh" size={20} color="#4A90E2" />
