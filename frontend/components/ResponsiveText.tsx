@@ -7,7 +7,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Mobile-first responsive breakpoints
 const isSmallMobile = SCREEN_WIDTH < 360;
 const isMediumMobile = SCREEN_WIDTH >= 360 && SCREEN_WIDTH < 414;
-const isLargeMobile = SCREEN_WIDTH >= 414;
 
 interface ResponsiveTextProps {
   children: React.ReactNode;
