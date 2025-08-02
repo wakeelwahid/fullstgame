@@ -1,7 +1,4 @@
-` tags, making sure to avoid the forbidden words and adhere to all the given constraints.
 
-```
-<replit_final_file>
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, Modal, TextInput, Alert, TouchableOpacity, Text, ScrollView, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -46,7 +43,7 @@ export default function App() {
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showAgeVerification, setShowAgeVerification] = useState(true);
+  const [showAgeVerification, setShowAgeVerification] = useState(false);
   const [isAgeVerified, setIsAgeVerified] = useState(false);
 
   // User data
@@ -116,20 +113,10 @@ export default function App() {
   const features = FEATURES;
 
   useEffect(() => {
-    // Show age verification on app start
-    setTimeout(() => {
-      setShowAgeVerification(true);
-    }, 1000);
+    // Auto start the app without age verification for demo
+    setIsAgeVerified(true);
+    setIsAuthenticated(true);
   }, []);
-
-  useEffect(() => {
-    // Show auth modal after age verification
-    if (isAgeVerified && !isAuthenticated) {
-      setTimeout(() => {
-        setShowAuthModal(true);
-      }, 500);
-    }
-  }, [isAgeVerified, isAuthenticated]);
 
   const handleAgeVerificationAccept = () => {
     setIsAgeVerified(true);
@@ -427,7 +414,7 @@ export default function App() {
         user={userData}
       />
 
-      <View style={[styles.content, !isAgeVerified && styles.blurredContent]}>
+      <View style={styles.content}>
         {showKYCPage ? (
           <KYCPage onBack={() => setShowKYCPage(false)} />
         ) : (
@@ -439,12 +426,6 @@ export default function App() {
         activeTab={activeTab}
         onMenuItemPress={handleMenuItemPress}
       />
-
-      {!isAgeVerified && !showAgeVerification && (
-        <View style={styles.verificationOverlay}>
-          <Text style={styles.overlayText}>Age verification required</Text>
-        </View>
-      )}
 
       <BettingModal
         visible={showBettingModal}
@@ -538,9 +519,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  blurredContent: {
-    opacity: 0.3,
   },
   tabContent: {
     flex: 1,
@@ -666,21 +644,6 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveSize(16),
     textAlign: 'center',
     marginTop: 20,
-  },
-  verificationOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  overlayText: {
-    fontSize: getResponsiveSize(18),
-    color: 'white',
-    fontWeight: 'bold',
   },
   helpContainer: {
     width: '100%',
