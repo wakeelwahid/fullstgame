@@ -7,8 +7,9 @@ interface GameHistoryProps {
   betHistory?: any[];
 }
 
-// Mock game history data for last 7 days
+// Enhanced mock game history data for last 30 days
 const mockGameHistory = [
+  // Today
   {
     id: '1',
     game: 'Jaipur King',
@@ -17,7 +18,7 @@ const mockGameHistory = [
     type: 'andar',
     status: 'win',
     winAmount: 180,
-    timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
+    timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000), // Today
   },
   {
     id: '2',
@@ -26,8 +27,9 @@ const mockGameHistory = [
     amount: 50,
     type: 'bahar',
     status: 'loss',
-    timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
+    timestamp: Date.now() - (0 * 24 * 60 * 60 * 1000), // Today
   },
+  // Yesterday
   {
     id: '3',
     game: 'Jaipur King',
@@ -36,7 +38,7 @@ const mockGameHistory = [
     type: 'andar',
     status: 'win',
     winAmount: 360,
-    timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
+    timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
   },
   {
     id: '4',
@@ -45,8 +47,9 @@ const mockGameHistory = [
     amount: 150,
     type: 'bahar',
     status: 'pending',
-    timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
+    timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
   },
+  // 2 days ago
   {
     id: '5',
     game: 'Delhi Bazaar',
@@ -54,7 +57,7 @@ const mockGameHistory = [
     amount: 75,
     type: 'andar',
     status: 'loss',
-    timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000), // 3 days ago
+    timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
   },
   {
     id: '6',
@@ -64,8 +67,9 @@ const mockGameHistory = [
     type: 'bahar',
     status: 'win',
     winAmount: 540,
-    timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000), // 4 days ago
+    timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
   },
+  // 3 days ago
   {
     id: '7',
     game: 'Mumbai King',
@@ -73,18 +77,136 @@ const mockGameHistory = [
     amount: 100,
     type: 'andar',
     status: 'loss',
+    timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000), // 3 days ago
+  },
+  {
+    id: '8',
+    game: 'Ghaziabad',
+    number: '89',
+    amount: 250,
+    type: 'bahar',
+    status: 'win',
+    winAmount: 450,
+    timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000), // 3 days ago
+  },
+  // 4 days ago
+  {
+    id: '9',
+    game: 'Faridabad',
+    number: '12',
+    amount: 80,
+    type: 'andar',
+    status: 'loss',
+    timestamp: Date.now() - (4 * 24 * 60 * 60 * 1000), // 4 days ago
+  },
+  // 5 days ago
+  {
+    id: '10',
+    game: 'Disawar',
+    number: '67',
+    amount: 120,
+    type: 'bahar',
+    status: 'win',
+    winAmount: 216,
     timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000), // 5 days ago
+  },
+  // 6 days ago
+  {
+    id: '11',
+    game: 'Gali',
+    number: '33',
+    amount: 90,
+    type: 'andar',
+    status: 'loss',
+    timestamp: Date.now() - (6 * 24 * 60 * 60 * 1000), // 6 days ago
+  },
+  // 7 days ago
+  {
+    id: '12',
+    game: 'Diamond King',
+    number: '55',
+    amount: 180,
+    type: 'bahar',
+    status: 'win',
+    winAmount: 324,
+    timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000), // 7 days ago
+  },
+  // 15 days ago
+  {
+    id: '13',
+    game: 'Jaipur King',
+    number: '21',
+    amount: 60,
+    type: 'andar',
+    status: 'loss',
+    timestamp: Date.now() - (15 * 24 * 60 * 60 * 1000), // 15 days ago
+  },
+  // 20 days ago
+  {
+    id: '14',
+    game: 'Delhi Bazaar',
+    number: '77',
+    amount: 140,
+    type: 'bahar',
+    status: 'win',
+    winAmount: 252,
+    timestamp: Date.now() - (20 * 24 * 60 * 60 * 1000), // 20 days ago
+  },
+  // 25 days ago
+  {
+    id: '15',
+    game: 'Mumbai King',
+    number: '99',
+    amount: 200,
+    type: 'andar',
+    status: 'win',
+    winAmount: 360,
+    timestamp: Date.now() - (25 * 24 * 60 * 60 * 1000), // 25 days ago
   }
 ];
 
 export default function GameHistory({ betHistory = mockGameHistory }: GameHistoryProps) {
   const [selectedGame, setSelectedGame] = useState<string>('All Games');
+  const [selectedDateFilter, setSelectedDateFilter] = useState<string>('Last 7 Days');
   const [filteredHistory, setFilteredHistory] = useState<any[]>([]);
 
-  // Get last 7 days of bet history
-  const getLast7DaysHistory = () => {
-    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    return betHistory.filter(bet => bet.timestamp && bet.timestamp >= sevenDaysAgo);
+  // Get filtered history based on date range
+  const getFilteredHistoryByDate = () => {
+    const now = Date.now();
+    let filterTimestamp;
+
+    switch (selectedDateFilter) {
+      case 'Today':
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        filterTimestamp = todayStart.getTime();
+        break;
+      case 'Yesterday':
+        const yesterdayStart = new Date();
+        yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+        yesterdayStart.setHours(0, 0, 0, 0);
+        const yesterdayEnd = new Date();
+        yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+        yesterdayEnd.setHours(23, 59, 59, 999);
+        return betHistory.filter(bet => 
+          bet.timestamp && 
+          bet.timestamp >= yesterdayStart.getTime() && 
+          bet.timestamp <= yesterdayEnd.getTime()
+        );
+      case 'Last 7 Days':
+        filterTimestamp = now - (7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'Last 15 Days':
+        filterTimestamp = now - (15 * 24 * 60 * 60 * 1000);
+        break;
+      case 'Last 30 Days':
+        filterTimestamp = now - (30 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        filterTimestamp = now - (7 * 24 * 60 * 60 * 1000);
+    }
+
+    return betHistory.filter(bet => bet.timestamp && bet.timestamp >= filterTimestamp);
   };
 
   // Get unique game names for dropdown
@@ -94,14 +216,14 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
   };
 
   useEffect(() => {
-    const last7DaysHistory = getLast7DaysHistory();
+    const dateFilteredHistory = getFilteredHistoryByDate();
 
     if (selectedGame === 'All Games') {
-      setFilteredHistory(last7DaysHistory);
+      setFilteredHistory(dateFilteredHistory);
     } else {
-      setFilteredHistory(last7DaysHistory.filter(bet => bet.game === selectedGame));
+      setFilteredHistory(dateFilteredHistory.filter(bet => bet.game === selectedGame));
     }
-  }, [selectedGame, betHistory]);
+  }, [selectedGame, selectedDateFilter, betHistory]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -177,10 +299,19 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
           {/* Date Filter */}
           <View style={styles.filterSection}>
             <Text style={styles.filterSectionTitle}>📅 Period</Text>
-            <View style={styles.dateFilterContainer}>
-              <TouchableOpacity style={styles.dateFilterButton}>
-                <Text style={styles.dateFilterText}>Last 7 Days</Text>
-              </TouchableOpacity>
+            <View style={styles.compactPickerContainer}>
+              <Picker
+                selectedValue={selectedDateFilter}
+                onValueChange={(itemValue) => setSelectedDateFilter(itemValue)}
+                style={styles.compactPicker}
+                dropdownIconColor="#4A90E2"
+              >
+                <Picker.Item label="Today" value="Today" color="#fff" />
+                <Picker.Item label="Yesterday" value="Yesterday" color="#fff" />
+                <Picker.Item label="Last 7 Days" value="Last 7 Days" color="#fff" />
+                <Picker.Item label="Last 15 Days" value="Last 15 Days" color="#fff" />
+                <Picker.Item label="Last 30 Days" value="Last 30 Days" color="#fff" />
+              </Picker>
             </View>
           </View>
 
@@ -213,9 +344,22 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
                   contentContainerStyle={styles.betsScrollContent}
                 >
                   {bets.map((bet, betIndex) => (
-                    <View key={betIndex} style={styles.betCard}>
+                    <View key={betIndex} style={[
+                      styles.betCard,
+                      bet.status === 'win' && styles.winCard,
+                      bet.status === 'loss' && styles.lossCard,
+                      bet.status === 'pending' && styles.pendingCard
+                    ]}>
                       <View style={styles.gameNameContainer}>
                         <Text style={styles.gameName}>🎮 {bet.game}</Text>
+                        <View style={[
+                          styles.statusBadge,
+                          styles[`status${bet.status.charAt(0).toUpperCase() + bet.status.slice(1)}`]
+                        ]}>
+                          <Text style={styles.statusText}>
+                            {bet.status === 'win' ? '✅' : bet.status === 'loss' ? '❌' : '⏳'}
+                          </Text>
+                        </View>
                       </View>
 
                       <View style={styles.betDetailsContainer}>
@@ -226,6 +370,12 @@ export default function GameHistory({ betHistory = mockGameHistory }: GameHistor
 
                         <View style={styles.amountContainer}>
                           <Text style={styles.betAmount}>₹{bet.amount}</Text>
+                          {bet.status === 'win' && bet.winAmount && (
+                            <Text style={styles.winAmount}>+₹{bet.winAmount}</Text>
+                          )}
+                          {bet.status === 'loss' && (
+                            <Text style={styles.lossAmount}>-₹{bet.amount}</Text>
+                          )}
                         </View>
                       </View>
                     </View>
@@ -471,5 +621,55 @@ const styles = StyleSheet.create({
     color: '#4A90E2',
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  // Status-specific card styles
+  winCard: {
+    borderColor: '#00FF88',
+    borderWidth: 1,
+    backgroundColor: '#1a2e1a',
+  },
+  lossCard: {
+    borderColor: '#FF4757',
+    borderWidth: 1,
+    backgroundColor: '#2e1a1a',
+  },
+  pendingCard: {
+    borderColor: '#FFD700',
+    borderWidth: 1,
+    backgroundColor: '#2e2a1a',
+  },
+  // Status badge styles
+  statusBadge: {
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginTop: 4,
+    alignSelf: 'center',
+  },
+  statusWin: {
+    backgroundColor: '#00FF88',
+  },
+  statusLoss: {
+    backgroundColor: '#FF4757',
+  },
+  statusPending: {
+    backgroundColor: '#FFD700',
+  },
+  statusText: {
+    fontSize: 8,
+    fontWeight: 'bold',
+  },
+  // Win/Loss amount styles
+  winAmount: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#00FF88',
+    marginTop: 2,
+  },
+  lossAmount: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#FF4757',
+    marginTop: 2,
   },
 });
