@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput, Alert, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,7 +31,7 @@ export default function BettingModal({
   const [selectedNumber, setSelectedNumber] = React.useState<any>(null);
   const [selectedType, setSelectedType] = React.useState<string>('');
   const [customAmount, setCustomAmount] = React.useState<string>('');
-  
+
   // Animation values
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(0.8)).current;
@@ -213,13 +212,13 @@ export default function BettingModal({
                 <View style={[styles.particle, { top: -5, right: 5 }]} />
               </Animated.View>
             )}
-            
+
             <Text style={[
               styles.numberText,
               { color: getNumberTextColor(i) },
               isSelected && styles.selectedNumberText
             ]}>{i}</Text>
-            
+
             {isSelected && (
               <Animated.View style={[
                 styles.betAmountBadge,
@@ -230,7 +229,7 @@ export default function BettingModal({
                 <Text style={styles.betAmountBadgeText}>₹{bet.amount}</Text>
               </Animated.View>
             )}
-            
+
             {/* Glow effect */}
             <Animated.View style={[
               styles.glowEffect,
@@ -291,12 +290,12 @@ export default function BettingModal({
                 }]
               }
             ]} />
-            
+
             <Text style={[
               styles.andarBaharText,
               isSelected && styles.selectedAndarText
             ]}>{i}</Text>
-            
+
             {isSelected && (
               <Animated.View style={[
                 styles.betAmountBadgeSmall,
@@ -358,12 +357,12 @@ export default function BettingModal({
                 }]
               }
             ]} />
-            
+
             <Text style={[
               styles.andarBaharText,
               isSelected && styles.selectedBaharText
             ]}>{i}</Text>
-            
+
             {isSelected && (
               <Animated.View style={[
                 styles.betAmountBadgeSmall,
@@ -396,7 +395,7 @@ export default function BettingModal({
           })
         }
       ]}>
-        
+
 
         <Animated.View style={[
           styles.bettingModal,
@@ -429,7 +428,7 @@ export default function BettingModal({
                 <Ionicons name="close" size={24} color="#ffffff" />
               </TouchableOpacity>
             </View>
-            
+
             {/* Animated border */}
             <Animated.View style={[
               styles.headerBorder,
@@ -774,7 +773,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)',
+    backgroundColor: '#1a1a1a',
+    boxShadow: '0px 2px 3.84px rgba(0, 0, 0, 0.25)',
   },
   headerContent: {
     flexDirection: 'row',
