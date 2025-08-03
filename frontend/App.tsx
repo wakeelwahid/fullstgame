@@ -19,6 +19,8 @@ import GameHistory from './components/GameHistory';
 import ReferPage from './components/ReferPage';
 import ResultsModal from './components/ResultsModal';
 import AuthScreen from './components/AuthScreen';
+import AgeVerificationModal from './components/AgeVerificationModal';
+import Transaction from './components/Transaction';
 
 // Import additional components
 import TermsConditions from './components/TermsConditions';
