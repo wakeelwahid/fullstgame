@@ -14,9 +14,8 @@ import WalletOperations from './components/WalletOperations';
 import PaymentSuccess from './components/PaymentSuccess';
 import WithdrawSuccess from './components/WithdrawSuccess';
 import Profile from './components/Profile';
-import AgeVerificationModal from './components/AgeVerificationModal';
-import Transaction from './components/Transaction';
 import KYCPage from './components/KYCPage';
+import GameHistory from './components/GameHistory';
 import ReferPage from './components/ReferPage';
 import ResultsModal from './components/ResultsModal';
 import AuthScreen from './components/AuthScreen';
@@ -27,7 +26,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import HelpSupport from './components/HelpSupport';
 import RefundPolicy from './components/RefundPolicy';
 import ResponsiveText from './components/ResponsiveText';
-import GameHistory from './components/GameHistory';
+
 
 // Import constants
 import { GAME_CARDS, FEATURES } from './constants/gameData';
@@ -511,6 +510,8 @@ export default function App() {
                     <Ionicons name="close" size={20} color="#fff" />
                   </TouchableOpacity>
                 </View>
+
+                {/* GameHistory Component */}
                 <GameHistory betHistory={betHistory} />
               </View>
             </SafeAreaView>
