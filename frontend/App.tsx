@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, StatusBar, TextInput, Alert, TouchableOpacity, Text, ScrollView, Dimensions } from 'react-native';
+import { View, StyleSheet, SafeAreaView, StatusBar, TextInput, Alert, TouchableOpacity, Text, ScrollView, Dimensions, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Import components
@@ -26,6 +26,8 @@ import TermsConditions from './components/TermsConditions';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import HelpSupport from './components/HelpSupport';
 import RefundPolicy from './components/RefundPolicy';
+import ResponsiveText from './components/ResponsiveText';
+import GameHistory from './components/GameHistory';
 
 // Import constants
 import { GAME_CARDS, FEATURES } from './constants/gameData';
@@ -234,7 +236,22 @@ export default function App() {
   };
 
   const handleMenuItemPress = (key: string) => {
+    console.log('Menu item pressed:', key);
     setActiveTab(key);
+
+    if (key === 'home') {
+      setCurrentComponent('home');
+    } else if (key === 'mybets') {
+      setCurrentComponent('mybets');
+    } else if (key === 'wallet') {
+      setCurrentComponent('wallet');
+    } else if (key === 'games') {
+      setCurrentComponent('games');
+    } else if (key === 'profile') {
+      setCurrentComponent('profile');
+    } else if (key === 'gamehistory') {
+      setShowGameHistory(true);
+    }
   };
 
   const handleHeaderMenuItemPress = (key: string) => {
@@ -396,7 +413,7 @@ export default function App() {
             onCompleteKYC={() => setShowKYCPage(true)}
           />
         );
-      
+
       default:
         return (
           <View style={styles.tabContent}>
@@ -419,6 +436,14 @@ export default function App() {
     }
   }, [isAuthenticated, isAgeVerified]);
 
+  const [showAuthScreen, setShowAuthScreen] = useState(false);
+  const [showKYC, setShowKYC] = useState(false);
+  const [showReferPage, setShowReferPage] = useState(false);
+  const [showHelpSupport, setShowHelpSupport] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showTermsConditions, setShowTermsConditions] = useState(false);
+  const [showRefundPolicy, setShowRefundPolicy] = useState(false);
+  const [showGameHistory, setShowGameHistory] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -448,6 +473,48 @@ export default function App() {
           <KYCPage onBack={() => setShowKYCPage(false)} />
         ) : (
           renderContent()
+        )}
+
+        {showGameHistory && (
+          <Modal
+            visible={showGameHistory}
+            animationType="slide"
+            presentationStyle="fullScreen"
+            onRequestClose={() => setShowGameHistory(false)}
+          >
+            <SafeAreaView style={{ flex: 1 }}>
+              <View>
+                <View style={{ 
+                  flexDirection: 'row', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  padding: 15,
+                  backgroundColor: '#1a1a1a',
+                  borderBottomWidth: 1,
+                  borderBottomColor: '#333'
+                }}>
+                  <Text style={{ 
+                    fontSize: 18, 
+                    fontWeight: 'bold', 
+                    color: '#4A90E2' 
+                  }}>
+                    🎮 Game History
+                  </Text>
+                  <TouchableOpacity 
+                    onPress={() => setShowGameHistory(false)}
+                    style={{ 
+                      padding: 8,
+                      backgroundColor: '#333',
+                      borderRadius: 20
+                    }}
+                  >
+                    <Ionicons name="close" size={20} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+                <GameHistory betHistory={betHistory} />
+              </View>
+            </SafeAreaView>
+          </Modal>
         )}
       </View>
 
@@ -541,7 +608,7 @@ export default function App() {
         onClose={() => setShowResultsModal(false)}
       />
 
-      
+
     </SafeAreaView>
   );
 }
@@ -679,5 +746,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
-  
+
 });
