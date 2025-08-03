@@ -61,7 +61,7 @@ export default function App() {
     phone: '',
     email: '',
     referralCode: '',
-    kycStatus: 'PENDING' as 'VERIFIED' | 'PENDING' | 'REJECTED'
+    kycStatus: 'PENDING' as 'VERIFIED' | 'REJECTED'
   });
 
   // Remove modal states as these will now be tabs
@@ -415,6 +415,11 @@ export default function App() {
           />
         );
 
+      case 'game-history':
+        return (
+          <GameHistory />
+        );
+
       default:
         return (
           <View style={styles.tabContent}>
@@ -463,7 +468,7 @@ export default function App() {
             phone: '',
             email: '',
             referralCode: '',
-            kycStatus: 'PENDING' as 'VERIFIED' | 'PENDING' | 'REJECTED'
+            kycStatus: 'PENDING' as 'VERIFIED' | 'REJECTED'
           });
           setShowAuthModal(true);
         }}
