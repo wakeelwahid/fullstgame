@@ -9,9 +9,8 @@ interface GameHistoryProps {
   betHistory?: any[];
 }
 
-const GameHistory = ({ betHistory }: GameHistoryProps) => {
-  // Static test data for last 7 days - Define first
-  const staticTestData = [
+// Static test data for last 7 days - Define outside component
+const staticTestData = [
     // Today's data
     { id: 1, game: 'Jaipur King', number: '45', amount: 100, type: 'single', status: 'win', winAmount: 950, timestamp: Date.now() - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (1 * 60 * 60 * 1000)).toISOString() },
     { id: 2, game: 'Faridabad', number: '23', amount: 200, type: 'jodi', status: 'loss', winAmount: 0, timestamp: Date.now() - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (2 * 60 * 60 * 1000)).toISOString() },
@@ -55,6 +54,7 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
     { id: 26, game: 'Faridabad', number: '07', amount: 250, type: 'jodi', status: 'win', winAmount: 2375, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
   ];
 
+const GameHistory = ({ betHistory }: GameHistoryProps) => {
   const [selectedGame, setSelectedGame] = useState<string>('All Games');
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('Last 7 Days');
   const [filteredHistory, setFilteredHistory] = useState<any[]>(staticTestData);
