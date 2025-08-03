@@ -15,7 +15,7 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
   const [filteredHistory, setFilteredHistory] = useState<any[]>(staticTestData);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [realBetHistory, setRealBetHistory] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false); // Disabled for static data testing
+  const [loading, setLoading] = useState(true); // Enable loading for real API calls
 
   // Game names mapping
   const gameNamesMap: Record<string, string> = {
@@ -64,8 +64,8 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
   };
 
   useEffect(() => {
-    // fetchBetHistory(); // Commented for static data testing
-    console.log('Using static test data for GameHistory');
+    fetchBetHistory(); // Enable real API call
+    console.log('Fetching real bet history from API');
   }, []);
 
   // Static test data for last 7 days
@@ -113,8 +113,8 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
     { id: 26, game: 'Faridabad', number: '07', amount: 250, type: 'jodi', status: 'win', winAmount: 2375, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
   ];
 
-  // Use static data for testing, then real data if available, otherwise prop data
-  const currentHistory = staticTestData.length > 0 ? staticTestData : (realBetHistory.length > 0 ? realBetHistory : (betHistory || []));
+  // Use real API data when available, fallback to static data for testing
+  const currentHistory = realBetHistory.length > 0 ? realBetHistory : (staticTestData.length > 0 ? staticTestData : (betHistory || []));
 
   // Get last 7 days data only
   const getLast7DaysHistory = () => {
