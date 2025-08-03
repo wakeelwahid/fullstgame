@@ -14,58 +14,17 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('Last 7 Days');
   const [filteredHistory, setFilteredHistory] = useState<any[]>(staticTestData);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
-  const [realBetHistory, setRealBetHistory] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true); // Enable loading for real API calls
+  const [loading, setLoading] = useState(false); // Disable loading for static data
 
-  // Game names mapping
-  const gameNamesMap: Record<string, string> = {
-    'JAIPUR KING': 'Jaipur King',
-    'FARIDABAD': 'Faridabad', 
-    'GHAZIABAD': 'Ghaziabad',
-    'GALI': 'Gali',
-    'DISAWER': 'Disawer',
-    'DIAMOND KING': 'Diamond King'
-  };
-
-  // Fetch real bet history from API
-  const fetchBetHistory = async () => {
-    try {
-      setLoading(true);
-      const response = await betService.getBetHistory(1, 100); // Fetch last 100 bets
-      
-      if (response.success && response.data) {
-        const formattedBets = response.data.bets.map((bet: any) => ({
-          id: bet.id,
-          game: gameNamesMap[bet.gameName?.toUpperCase()] || bet.gameName || 'Unknown Game',
-          number: bet.number || '',
-          amount: bet.amount || 0,
-          type: bet.type === 'ANDAR' ? 'andar' : bet.type === 'BAHAR' ? 'bahar' : 'number',
-          status: bet.status === 'WON' ? 'win' : bet.status === 'LOST' ? 'loss' : 'pending',
-          winAmount: bet.winAmount || 0,
-          timestamp: new Date(bet.placedAt).getTime(),
-          placedAt: bet.placedAt
-        }));
-
-        // Filter for last 7 days only
-        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-        const last7DaysBets = formattedBets.filter((bet: any) => bet.timestamp >= sevenDaysAgo);
-        
-        setRealBetHistory(last7DaysBets);
-      } else {
-        console.log('No bet history found or API error');
-        setRealBetHistory([]);
-      }
-    } catch (error) {
-      console.error('Error fetching bet history:', error);
-      setRealBetHistory([]);
-    } finally {
-      setLoading(false);
-    }
+  // Dummy refresh function for UI testing
+  const fetchBetHistory = () => {
+    console.log('Using static data for UI testing - no API call');
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetchBetHistory(); // Enable real API call
-    console.log('Fetching real bet history from API');
+    console.log('Using static test data for GameHistory UI testing');
+    setLoading(false);
   }, []);
 
   // Static test data for last 7 days
@@ -113,8 +72,8 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
     { id: 26, game: 'Faridabad', number: '07', amount: 250, type: 'jodi', status: 'win', winAmount: 2375, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
   ];
 
-  // Use real API data when available, fallback to static data for testing
-  const currentHistory = realBetHistory.length > 0 ? realBetHistory : (staticTestData.length > 0 ? staticTestData : (betHistory || []));
+  // Use only static data for UI testing
+  const currentHistory = staticTestData;
 
   // Get last 7 days data only
   const getLast7DaysHistory = () => {
@@ -132,8 +91,8 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
 
   useEffect(() => {
     const last7DaysHistory = getLast7DaysHistory();
-    console.log('Processing history for game filter:', selectedGame);
-    console.log('Available history:', last7DaysHistory.length);
+    console.log('Processing static history for game filter:', selectedGame);
+    console.log('Available static history:', last7DaysHistory.length);
 
     if (selectedGame === 'All Games') {
       setFilteredHistory(last7DaysHistory);
@@ -143,7 +102,7 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
       setFilteredHistory(gameFiltered);
       console.log('Set filtered history for', selectedGame, ':', gameFiltered.length);
     }
-  }, [selectedGame, realBetHistory, betHistory, staticTestData]);
+  }, [selectedGame, staticTestData]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -379,7 +338,7 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
                 🎮 पहले कुछ गेम खेलें फिर यहाँ हिस्ट्री देखें
               </Text>
               <Text style={styles.emptySubMessage}>
-                Debug: Static Data: {staticTestData.length} | Filtered: {filteredHistory.length} | Selected: {selectedGame}
+                🎯 UI Testing Mode: Static Data: {staticTestData.length} | Filtered: {filteredHistory.length} | Selected: {selectedGame}
               </Text>
               <TouchableOpacity style={styles.refreshButtonEmpty} onPress={fetchBetHistory}>
                 <Ionicons name="refresh" size={20} color="#4A90E2" />

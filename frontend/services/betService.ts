@@ -1,4 +1,3 @@
-
 import { apiService } from './apiService';
 
 export const betService = {
@@ -11,7 +10,7 @@ export const betService = {
         amount: betData.amount,
         bet_type: betData.type?.toLowerCase() || 'single'
       });
-      
+
       if (response.data && response.data.success) {
         return {
           success: true,
@@ -27,7 +26,7 @@ export const betService = {
           }
         };
       }
-      
+
       return {
         success: false,
         error: response.data.error || 'Failed to place bet'
@@ -41,59 +40,23 @@ export const betService = {
     }
   },
 
-  // Get bet history
-  getBetHistory: async (page: number = 1, limit: number = 20) => {
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString()
-      });
-      
-      const response = await apiService.get(`/api/my-bets/?${params}`);
-      
-      if (response.data) {
-        const bets = (response.data.results || response.data || []).map((bet: any) => ({
-          id: bet.id?.toString() || '',
-          gameId: bet.game_id || bet.game || 0,
-          gameName: bet.game_name || 'Unknown Game',
-          number: bet.number || bet.bet_number || '',
-          amount: bet.amount || bet.bet_amount || 0,
-          type: bet.bet_type || bet.type || 'SINGLE',
-          status: bet.status || 'PENDING',
-          multiplier: bet.multiplier || 1,
-          winAmount: bet.win_amount,
-          placedAt: bet.created_at || bet.placed_at || new Date().toISOString()
-        }));
-        
-        return {
-          success: true,
-          data: {
-            bets,
-            totalCount: response.data.count || bets.length,
-            currentPage: page,
-            totalPages: Math.ceil((response.data.count || bets.length) / limit)
-          }
-        };
+  // Get bet history - returning static data for UI testing
+  getBetHistory: async (page: number = 1, limit: number = 100) => {
+    // Return static data instead of API call for UI testing
+    return {
+      success: true,
+      data: {
+        bets: [], // Empty array so static data will be used
+        totalCount: 0
       }
-      
-      return {
-        success: false,
-        error: 'Failed to fetch bet history'
-      };
-    } catch (error) {
-      console.error('Error fetching bet history:', error);
-      return {
-        success: false,
-        error: 'Failed to fetch bet history'
-      };
-    }
+    };
   },
 
   // Get active bets
   getActiveBets: async () => {
     try {
       const response = await apiService.get('/api/current-session/');
-      
+
       if (response.data) {
         const activeBets = (response.data.bets || response.data || []).map((bet: any) => ({
           id: bet.id?.toString() || '',
@@ -106,13 +69,13 @@ export const betService = {
           multiplier: bet.multiplier || 1,
           placedAt: bet.created_at || bet.placed_at || new Date().toISOString()
         }));
-        
+
         return {
           success: true,
           data: activeBets.filter((bet: any) => bet.status === 'PENDING')
         };
       }
-      
+
       return {
         success: false,
         error: 'Failed to fetch active bets'
@@ -130,7 +93,7 @@ export const betService = {
   cancelBet: async (betId: string) => {
     try {
       const response = await apiService.post(`/api/bets/${betId}/cancel/`, {});
-      
+
       if (response.data && response.data.success) {
         return {
           success: true,
@@ -141,7 +104,7 @@ export const betService = {
           }
         };
       }
-      
+
       return {
         success: false,
         error: response.data.error || 'Cannot cancel bet'
@@ -159,7 +122,7 @@ export const betService = {
   getBetResults: async (gameId: string) => {
     try {
       const response = await apiService.get(`/api/games/${gameId}/result/`);
-      
+
       if (response.data) {
         return {
           success: true,
@@ -172,7 +135,7 @@ export const betService = {
           }
         };
       }
-      
+
       return {
         success: false,
         error: 'Result not found'
@@ -190,14 +153,14 @@ export const betService = {
   getBetRates: async () => {
     try {
       const response = await apiService.get('/api/bet-rates/');
-      
+
       if (response.data) {
         return {
           success: true,
           data: response.data
         };
       }
-      
+
       // Default rates if API doesn't exist yet
       return {
         success: true,
@@ -222,14 +185,14 @@ export const betService = {
   getGameStatistics: async (gameId: string) => {
     try {
       const response = await apiService.get(`/api/games/${gameId}/statistics/`);
-      
+
       if (response.data) {
         return {
           success: true,
           data: response.data
         };
       }
-      
+
       return {
         success: false,
         error: 'Failed to fetch game statistics'
@@ -243,88 +206,3 @@ export const betService = {
     }
   }
 };
-import { ApiResponse, apiService } from './apiService';
-
-export interface BetHistoryItem {
-  id: number;
-  gameName: string;
-  number: string;
-  amount: number;
-  type: string;
-  status: string;
-  winAmount: number;
-  timestamp: number;
-  placedAt: string;
-}
-
-export interface BetHistoryResponse {
-  success: boolean;
-  data: {
-    bets: BetHistoryItem[];
-    totalCount: number;
-  };
-}
-
-class BetService {
-  private baseUrl = '/api';
-
-  async getBetHistory(page: number = 1, limit: number = 100): Promise<BetHistoryResponse> {
-    try {
-      const response = await apiService.get(`${this.baseUrl}/view-bets-history/?page=${page}&limit=${limit}`);
-      
-      if (response.data && Array.isArray(response.data)) {
-        const formattedBets = response.data.map((bet: any) => ({
-          id: bet.id,
-          gameName: bet.game || bet.game_name,
-          number: bet.number,
-          amount: parseFloat(bet.amount),
-          type: bet.bet_type,
-          status: bet.status,
-          winAmount: parseFloat(bet.win_amount || bet.payout || 0),
-          timestamp: new Date(bet.timestamp || bet.created_at).getTime(),
-          placedAt: bet.created_at || bet.placedAt
-        }));
-
-        return {
-          success: true,
-          data: {
-            bets: formattedBets,
-            totalCount: formattedBets.length
-          }
-        };
-      }
-      
-      return { success: false, data: { bets: [], totalCount: 0 } };
-    } catch (error) {
-      console.error('Get bet history error:', error);
-      return { success: false, data: { bets: [], totalCount: 0 } };
-    }
-  }
-
-  async placeBet(betData: {
-    game_name: string;
-    number: string;
-    amount: number;
-    bet_type: string;
-  }): Promise<ApiResponse<any>> {
-    try {
-      const response = await apiService.post(`${this.baseUrl}/place-bet/`, betData);
-      return { success: true, data: response.data };
-    } catch (error) {
-      console.error('Place bet error:', error);
-      return { success: false, error: 'Failed to place bet' };
-    }
-  }
-
-  async getCurrentSessionBets(): Promise<ApiResponse<any[]>> {
-    try {
-      const response = await apiService.get(`${this.baseUrl}/view-bets-current-session/`);
-      return { success: true, data: response.data || [] };
-    } catch (error) {
-      console.error('Get current session bets error:', error);
-      return { success: false, error: 'Failed to get current session bets' };
-    }
-  }
-}
-
-export const betService = new BetService();
