@@ -194,44 +194,30 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
             <Text style={styles.dateBetCount}>{bets.length} बेट्स</Text>
           </View>
 
-          <View style={styles.table}>
-            {/* Table Header */}
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, { flex: 2 }]}>गेम</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1 }]}>नंबर</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1 }]}>टाइप</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1 }]}>राशि</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1 }]}>स्थिति</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1 }]}>जीत</Text>
-            </View>
-
-            {/* Table Rows */}
-            {bets.map((bet, betIndex) => (
-              <View key={betIndex} style={[
-                styles.tableRow,
-                betIndex % 2 === 0 ? styles.evenRow : styles.oddRow
-              ]}>
-                <Text style={[styles.tableCellText, { flex: 2 }]} numberOfLines={1}>
-                  {bet.game}
-                </Text>
-                <Text style={[styles.tableCellText, { flex: 1, fontWeight: 'bold', color: '#FFD700' }]}>
-                  {bet.number}
-                </Text>
-                <Text style={[styles.tableCellText, { flex: 1, fontSize: 10 }]}>
-                  {getBetTypeText(bet.type)}
-                </Text>
-                <Text style={[styles.tableCellText, { flex: 1, color: '#00FF88' }]}>
-                  ₹{bet.amount}
-                </Text>
-                <Text style={[styles.tableCellText, { flex: 1, color: getStatusColor(bet.status), fontSize: 10 }]}>
-                  {getStatusText(bet.status)}
-                </Text>
-                <Text style={[styles.tableCellText, { flex: 1, color: bet.winAmount ? '#00FF88' : '#999', fontSize: 10 }]}>
-                  {bet.winAmount ? `₹${bet.winAmount}` : '-'}
-                </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+            <View style={styles.table}>
+              {/* Table Header */}
+              <View style={styles.tableHeader}>
+                <Text style={[styles.tableHeaderText, styles.gameColumn]}>गेम का नाम</Text>
+                <Text style={[styles.tableHeaderText, styles.numberColumn]}>नंबर</Text>
               </View>
-            ))}
-          </View>
+
+              {/* Table Rows */}
+              {bets.map((bet, betIndex) => (
+                <View key={betIndex} style={[
+                  styles.tableRow,
+                  betIndex % 2 === 0 ? styles.evenRow : styles.oddRow
+                ]}>
+                  <Text style={[styles.tableCellText, styles.gameColumn]} numberOfLines={1}>
+                    {bet.game}
+                  </Text>
+                  <Text style={[styles.tableCellText, styles.numberColumn, { fontWeight: 'bold', color: '#FFD700' }]}>
+                    {bet.number}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
         </View>
       ))}
     </ScrollView>
@@ -265,19 +251,11 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>{stats.totalBets}</Text>
-              <Text style={styles.statLabel}>कुल बेट्स</Text>
+              <Text style={styles.statLabel}>कुल गेम्स</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>₹{stats.totalAmount}</Text>
-              <Text style={styles.statLabel}>कुल राशि</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>₹{stats.totalWin}</Text>
-              <Text style={styles.statLabel}>कुल जीत</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>{stats.winRate}%</Text>
-              <Text style={styles.statLabel}>जीत दर</Text>
+              <Text style={styles.statNumber}>{getUniqueGames().length - 1}</Text>
+              <Text style={styles.statLabel}>अलग गेम्स</Text>
             </View>
           </View>
 
@@ -426,16 +404,17 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     padding: 15,
-    gap: 10,
+    gap: 15,
+    justifyContent: 'center',
   },
   statCard: {
-    flex: 1,
     backgroundColor: '#1a1a1a',
-    padding: 12,
+    padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#333',
+    minWidth: 100,
   },
   statNumber: {
     fontSize: 16,
@@ -530,29 +509,42 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
   },
+  horizontalScroll: {
+    maxHeight: 400,
+  },
   table: {
     backgroundColor: '#1a1a1a',
     borderRadius: 8,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#333',
+    minWidth: 300,
   },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#333',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
   },
   tableHeaderText: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#4A90E2',
     textAlign: 'center',
   },
+  gameColumn: {
+    width: 180,
+    textAlign: 'left',
+    paddingLeft: 10,
+  },
+  numberColumn: {
+    width: 120,
+    textAlign: 'center',
+  },
   tableRow: {
     flexDirection: 'row',
-    paddingVertical: 10,
-    paddingHorizontal: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#2a2a2a',
   },
@@ -563,9 +555,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
   },
   tableCellText: {
-    fontSize: 11,
+    fontSize: 13,
     color: '#fff',
-    textAlign: 'center',
   },
 
   // Empty State
