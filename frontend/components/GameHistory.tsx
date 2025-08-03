@@ -10,24 +10,7 @@ interface GameHistoryProps {
 }
 
 const GameHistory = ({ betHistory }: GameHistoryProps) => {
-  const [selectedGame, setSelectedGame] = useState<string>('All Games');
-  const [selectedDateFilter, setSelectedDateFilter] = useState<string>('Last 7 Days');
-  const [filteredHistory, setFilteredHistory] = useState<any[]>(staticTestData);
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
-  const [loading, setLoading] = useState(false); // Disable loading for static data
-
-  // Dummy refresh function for UI testing
-  const fetchBetHistory = () => {
-    console.log('Using static data for UI testing - no API call');
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    console.log('Using static test data for GameHistory UI testing');
-    setLoading(false);
-  }, []);
-
-  // Static test data for last 7 days
+  // Static test data for last 7 days - Define first
   const staticTestData = [
     // Today's data
     { id: 1, game: 'Jaipur King', number: '45', amount: 100, type: 'single', status: 'win', winAmount: 950, timestamp: Date.now() - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (1 * 60 * 60 * 1000)).toISOString() },
@@ -71,6 +54,23 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
     { id: 25, game: 'Jaipur King', number: '19', amount: 130, type: 'single', status: 'loss', winAmount: 0, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - (1 * 60 * 60 * 1000)).toISOString() },
     { id: 26, game: 'Faridabad', number: '07', amount: 250, type: 'jodi', status: 'win', winAmount: 2375, timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000), placedAt: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000)).toISOString() },
   ];
+
+  const [selectedGame, setSelectedGame] = useState<string>('All Games');
+  const [selectedDateFilter, setSelectedDateFilter] = useState<string>('Last 7 Days');
+  const [filteredHistory, setFilteredHistory] = useState<any[]>(staticTestData);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [loading, setLoading] = useState(false); // Disable loading for static data
+
+  // Dummy refresh function for UI testing
+  const fetchBetHistory = () => {
+    console.log('Using static data for UI testing - no API call');
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    console.log('Using static test data for GameHistory UI testing');
+    setLoading(false);
+  }, []);
 
   // Use only static data for UI testing
   const currentHistory = staticTestData;
