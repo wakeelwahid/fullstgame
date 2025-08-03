@@ -194,29 +194,19 @@ const GameHistory = ({ betHistory }: GameHistoryProps) => {
             <Text style={styles.dateBetCount}>{bets.length} बेट्स</Text>
           </View>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-            <View style={styles.table}>
-              {/* Table Header */}
-              <View style={styles.tableHeader}>
-                <Text style={[styles.tableHeaderText, styles.gameColumn]}>गेम का नाम</Text>
-                <Text style={[styles.tableHeaderText, styles.numberColumn]}>नंबर</Text>
+          {/* Numbers Row - Horizontally Scrollable */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={styles.numbersScrollContainer}
+            contentContainerStyle={styles.numbersScrollContent}
+          >
+            {bets.map((bet, betIndex) => (
+              <View key={betIndex} style={styles.numberCard}>
+                <Text style={styles.numberText}>{bet.number}</Text>
+                <Text style={styles.gameNameText} numberOfLines={1}>{bet.game}</Text>
               </View>
-
-              {/* Table Rows */}
-              {bets.map((bet, betIndex) => (
-                <View key={betIndex} style={[
-                  styles.tableRow,
-                  betIndex % 2 === 0 ? styles.evenRow : styles.oddRow
-                ]}>
-                  <Text style={[styles.tableCellText, styles.gameColumn]} numberOfLines={1}>
-                    {bet.game}
-                  </Text>
-                  <Text style={[styles.tableCellText, styles.numberColumn, { fontWeight: 'bold', color: '#FFD700' }]}>
-                    {bet.number}
-                  </Text>
-                </View>
-              ))}
-            </View>
+            ))}
           </ScrollView>
         </View>
       ))}
@@ -509,54 +499,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
   },
-  horizontalScroll: {
-    maxHeight: 400,
-  },
-  table: {
+  numbersScrollContainer: {
     backgroundColor: '#1a1a1a',
     borderRadius: 8,
-    overflow: 'hidden',
+    padding: 15,
     borderWidth: 1,
     borderColor: '#333',
-    minWidth: 300,
   },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#333',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
+  numbersScrollContent: {
+    gap: 12,
+    paddingRight: 15,
   },
-  tableHeaderText: {
-    fontSize: 14,
+  numberCard: {
+    backgroundColor: '#0f0f0f',
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#2a2a2a',
+    minWidth: 80,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  numberText: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#4A90E2',
+    color: '#FFD700',
+    marginBottom: 6,
+  },
+  gameNameText: {
+    fontSize: 10,
+    color: '#999',
     textAlign: 'center',
-  },
-  gameColumn: {
-    width: 180,
-    textAlign: 'left',
-    paddingLeft: 10,
-  },
-  numberColumn: {
-    width: 120,
-    textAlign: 'center',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2a2a2a',
-  },
-  evenRow: {
-    backgroundColor: '#1a1a1a',
-  },
-  oddRow: {
-    backgroundColor: '#222',
-  },
-  tableCellText: {
-    fontSize: 13,
-    color: '#fff',
+    maxWidth: 70,
   },
 
   // Empty State
